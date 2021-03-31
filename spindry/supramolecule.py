@@ -67,7 +67,7 @@ class SupraMolecule(Molecule):
         return self._host
 
     def get_guest(self):
-        return self._host
+        return self._guest
 
     def get_cid(self):
         return self._cid

@@ -67,7 +67,8 @@ class Molecule:
             dtype=np.float64,
         )
 
-    def init(self, atoms, position_matrix):
+    @classmethod
+    def init(cls, atoms, position_matrix):
         """
         Init a Molecule with from atoms and position matrix.
 
@@ -81,8 +82,11 @@ class Molecule:
             is ``(n, 3)``.
 
         """
-        self._atoms = tuple(atoms)
-        self._position_matrix = np.array(position_matrix).T
+
+        molecule = cls.__new__(cls)
+        molecule._atoms = tuple(atoms)
+        molecule._position_matrix = np.array(position_matrix).T
+        return molecule
 
     def get_position_matrix(self):
         """
@@ -127,14 +131,10 @@ class Molecule:
         new_position_matrix = (
             self._position_matrix.T + displacement
         )
-
-        clone = self.__class__.__new__(self.__class__)
-        Molecule.init(
-            self=clone,
+        return Molecule.init(
             atoms=self._atoms,
             position_matrix=np.array(new_position_matrix),
         )
-        return clone
 
     def with_position_matrix(self, position_matrix):
         """
@@ -148,13 +148,10 @@ class Molecule:
 
         """
 
-        clone = self.__class__.__new__(self.__class__)
-        Molecule.init(
-            self=clone,
+        return Molecule.init(
             atoms=self._atoms,
             position_matrix=np.array(position_matrix),
         )
-        return clone
 
     def _write_xyz_content(self):
         """
