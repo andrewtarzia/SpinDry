@@ -1,54 +1,5 @@
-from copy import deepcopy
-from collections import defaultdict
 import stk
-import mchammer as mch
-
-# Do same as min example, but save as mol files with stk
-
-
-
-
-
-
-
-def get_long_bond_ids(mol):
-    """
-    Find long bonds in stk.ConstructedMolecule.
-
-    """
-    long_bond_ids = []
-    for bond_infos in mol.get_bond_infos():
-        if bond_infos.get_building_block() is None:
-            ids = (
-                bond_infos.get_bond().get_atom1().get_id(),
-                bond_infos.get_bond().get_atom2().get_id(),
-            )
-            long_bond_ids.append(ids)
-
-    return tuple(long_bond_ids)
-
-
-def get_subunits(mol):
-    """
-    Get connected graphs based on building block ids.
-
-    Returns
-    -------
-    subunits : :class:`.dict`
-        The subunits of `mol` split by building block id. Key is
-        subunit identifier, Value is :class:`iterable` of atom ids in
-        subunit.
-
-    """
-
-    subunits = defaultdict(list)
-    for atom_info in mol.get_atom_infos():
-        subunits[atom_info.get_building_block_id()].append(
-            atom_info.get_atom().get_id()
-        )
-
-    return subunits
-
+import spindry as spd
 
 # Building a cage from the examples on the stk docs.
 bb1 = stk.BuildingBlock(
@@ -60,10 +11,6 @@ bb2 = stk.BuildingBlock(
     functional_groups=[stk.AldehydeFactory()],
 )
 bb3 = stk.BuildingBlock('NCCN', [stk.PrimaryAminoFactory()])
-bb4 = stk.BuildingBlock.init_from_file(
-    'some_complex.mol',
-    functional_groups=[stk.PrimaryAminoFactory()],
-)
 bb5 = stk.BuildingBlock('NCCCCN', [stk.PrimaryAminoFactory()])
 
 cage = stk.ConstructedMolecule(
@@ -74,66 +21,62 @@ cage = stk.ConstructedMolecule(
         building_blocks={
             bb1: range(2),
             bb2: (2, 3),
-            bb3: 4,
-            bb4: 5,
+            bb3: (4, 5),
             bb5: range(6, 10),
         },
+        optimizer=stk.MCHammer(),
     ),
 )
-cage.write('poc.mol')
-stk_long_bond_ids = get_long_bond_ids(cage)
-mch_mol = mch.Molecule(
+cage.write('stk_example_output/poc.mol')
+cage = stk.BuildingBlock.init_from_molecule(cage)
+cage_atoms = [
+    (atom.get_id(), atom.__class__.__name__)
+    for atom in cage.get_atoms()
+]
+
+# Build stk guest.
+stk_mol = stk.BuildingBlock('CN1C=NC2=C1C(=O)N(C(=O)N2C)C')
+stk_mol.write('stk_example_output/guest.mol')
+stk_mol_atoms = [
+    (atom.get_id(), atom.__class__.__name__)
+    for atom in stk_mol.get_atoms()
+]
+
+host = spd.Molecule.init(
     atoms=(
-        mch.Atom(
-            id=atom.get_id(),
-            element_string=atom.__class__.__name__,
-        ) for atom in cage.get_atoms()
-    ),
-    bonds=(
-        mch.Bond(
-            id=i,
-            atom_ids=(
-                bond.get_atom1().get_id(),
-                bond.get_atom2().get_id(),
-            )
-        ) for i, bond in enumerate(cage.get_bonds())
+        spd.Atom(id=i[0], element_string=i[1])
+        for i in cage_atoms
     ),
     position_matrix=cage.get_position_matrix(),
 )
-mch_mol_nci = deepcopy(mch_mol)
-
-optimizer = mch.Optimizer(
-    step_size=0.25,
-    target_bond_length=1.2,
-    num_steps=500,
-)
-subunits = mch_mol.get_subunits(
-    bond_pair_ids=stk_long_bond_ids,
-)
-# Just get final step.
-mch_mol, mch_result = optimizer.get_result(
-    mol=mch_mol,
-    bond_pair_ids=stk_long_bond_ids,
-    subunits=subunits,
+guest = spd.Molecule.init(
+    atoms=(
+        spd.Atom(id=i[0], element_string=i[1])
+        for i in stk_mol_atoms
+    ),
+    position_matrix=stk_mol.get_position_matrix(),
 )
 
-
-optimizer = mch.Optimizer(
-    step_size=0.25,
-    target_bond_length=1.2,
-    num_steps=500,
+cg = spd.Spinner(
+    step_size=0.5,
+    rotation_step_size=5,
+    num_conformers=30,
 )
-subunits = get_subunits(mol=cage)
-# Just get final step.
-mch_mol_nci, mch_result_nci = optimizer.get_result(
-    mol=mch_mol_nci,
-    bond_pair_ids=stk_long_bond_ids,
-    # Can merge subunits to match distinct BuildingBlocks in stk
-    # ConstructedMolecule.
-    subunits=subunits,
-)
-print(mch_result_nci)
-cage = cage.with_position_matrix(mch_mol.get_position_matrix())
-cage.write('poc_opt.mol')
-cage = cage.with_position_matrix(mch_mol_nci.get_position_matrix())
-cage.write('poc_opt_nci.mol')
+for conformer in cg.get_conformers(host, guest):
+    print(conformer)
+    print(conformer.get_cid(), conformer.get_potential())
+    conformer.write_xyz_file(
+        f'stk_example_output/conf_{conformer.get_cid()}.xyz'
+    )
+    cage = cage.with_position_matrix(
+        conformer.get_host().get_position_matrix()
+    )
+    stk_mol = stk_mol.with_position_matrix(
+        conformer.get_guest().get_position_matrix()
+    )
+    complex_mol = stk.ConstructedMolecule(
+        topology_graph=stk.host_guest.Complex(cage, stk_mol)
+    )
+    complex_mol.write(
+        f'stk_example_output/conf_{conformer.get_cid()}.mol'
+    )
