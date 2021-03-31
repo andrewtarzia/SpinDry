@@ -1,4 +1,4 @@
-from mchammer import get_atom_distance
+from spindry import get_atom_distance
 import numpy as np
 
 
