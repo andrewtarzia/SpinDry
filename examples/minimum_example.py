@@ -6,7 +6,15 @@ guest = spd.Molecule('eg_guest.xyz')
 
 print(host, guest)
 
-conformer_generator = spd.Spinner(host=host, guest=guest)
+cg = spd.Spinner(
+    step_size=0.5,
+    rotation_step_size=5,
+    num_conformers=10,
+)
 
-for cid, conformer in enumerate(conformer_generator):
-    conformer.write(f'min_example_output/conf_{cid}.xyz')
+for conformer in cg.get_conformers(host, guest):
+    print(conformer)
+    print(conformer.get_cid(), conformer.get_potential())
+    conformer.write_xyz_file(
+        f'min_example_output/conf_{conformer.get_cid()}.xyz'
+    )
