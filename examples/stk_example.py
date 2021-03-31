@@ -3,6 +3,13 @@ from collections import defaultdict
 import stk
 import mchammer as mch
 
+# Do same as min example, but save as mol files with stk
+
+
+
+
+
+
 
 def get_long_bond_ids(mol):
     """

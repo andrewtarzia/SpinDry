@@ -9,35 +9,28 @@ Molecule class for optimisation.
 """
 
 import numpy as np
-import networkx as nx
 
 
 class Molecule:
     """
-    Molecule to optimize.
+    Representation of a molecule containing atoms and positions.
 
     """
 
-    def __init__(self, atoms, bonds, position_matrix):
+    def __init__(self, path):
         """
         Initialize a :class:`Molecule` instance.
 
         Parameters
         ----------
-        atoms : :class:`iterable` of :class:`.Atom`
-            Atoms that define the molecule.
-
-        bonds : :class:`iterable` of :class:`.Bond`
-            Bonds between atoms that define the molecule.
-
-        position_matrix : :class:`numpy.ndarray`
-            A ``(n, 3)`` matrix holding the position of every atom in
-            the :class:`.Molecule`.
+        path : :class:`str`
+            Path to `.xyz` file defining molecule to read.
 
         """
 
+        # Load in xyz file.
+
         self._atoms = tuple(atoms)
-        self._bonds = tuple(bonds)
         self._position_matrix = np.array(
             position_matrix.T,
             dtype=np.float64,
@@ -122,20 +115,6 @@ class Molecule:
         for atom in self._atoms:
             yield atom
 
-    def get_bonds(self):
-        """
-        Yield the bonds in the molecule, ordered as input.
-
-        Yields
-        ------
-        :class:`.Bond`
-            A bond in the molecule.
-
-        """
-
-        for bond in self._bonds:
-            yield bond
-
     def get_centroid(self, atom_ids=None):
         """
         Return the centroid.
@@ -175,48 +154,11 @@ class Molecule:
             len(atom_ids)
         )
 
-    def get_subunits(self, bond_pair_ids):
-        """
-        Get connected graphs based on Molecule separated by bonds.
-
-        Parameters
-        ----------
-        bond_pair_ids :
-            :class:`iterable` of :class:`tuple` of :class:`ints`
-            Iterable of pairs of atom ids with bond between them to
-            optimize.
-
-        Returns
-        -------
-        subunits : :class:`.dict`
-            The subunits of `mol` split by bonds defined by
-            `bond_pair_ids`. Key is subunit identifier, Value is
-            :class:`iterable` of atom ids in subunit.
-
-        """
-
-        # Produce a graph from the molecule that does not include edges
-        # where the bonds to be optimized are.
-        mol_graph = nx.Graph()
-        for atom in self.get_atoms():
-            mol_graph.add_node(atom.get_id())
-
-        # Add edges.
-        for bond in self.get_bonds():
-            pair_ids = (bond.get_atom1_id(), bond.get_atom2_id())
-            if pair_ids not in bond_pair_ids:
-                mol_graph.add_edge(*pair_ids)
-
-        # Get atom ids in disconnected subgraphs.
-        subunits = {
-            i: sg
-            for i, sg in enumerate(nx.connected_components(mol_graph))
-        }
-
-        return subunits
-
     def __str__(self):
         return repr(self)
 
     def __repr__(self):
-        return f'<{self.__class__.__name__} at {id(self)}>'
+        return (
+            f'<{self.__class__.__name__}({len(self._atoms)} atoms) '
+            f'at {id(self)}>'
+        )

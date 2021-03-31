@@ -1,12 +1,12 @@
 import setuptools
 
 setuptools.setup(
-    name="MCHammer",
-    version="1.0.2",
+    name="SpinDry",
+    version="0.0.1",
     author="Andrew Tarzia",
     author_email="andrew.tarzia@gmail.com",
-    description="Contains MC algorithm for optimising molecules.",
-    url="https://github.com/andrewtarzia/MCHammer",
+    description="Contains MC algorithm for generating host-guest conformers.",
+    url="https://github.com/andrewtarzia/SpinDry",
     packages=setuptools.find_packages(),
     install_requires=(
         'scipy',
