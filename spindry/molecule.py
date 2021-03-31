@@ -98,6 +98,44 @@ class Molecule:
 
         return np.array(self._position_matrix.T)
 
+    def with_centroid(self, position):
+        """
+        Return clone Molecule at position.
+
+        Parameters
+        ----------
+        position : :class:`numpy.ndarray`
+            The position of the centroid. The shape of the matrix
+            is ``(3, )``.
+
+        """
+
+        centroid = self.get_centroid()
+        return self.with_displacement(position-centroid)
+
+    def with_displacement(self, displacement):
+        """
+        Return a displaced clone Molecule.
+
+        Parameters
+        ----------
+        displacement : :class:`numpy.ndarray`
+            The displacement vector to be applied.
+
+        """
+
+        new_position_matrix = (
+            self._position_matrix.T + displacement
+        )
+
+        clone = self.__class__.__new__(self.__class__)
+        Molecule.init(
+            self=clone,
+            atoms=self._atoms,
+            position_matrix=np.array(new_position_matrix),
+        )
+        return clone
+
     def with_position_matrix(self, position_matrix):
         """
         Return clone Molecule with new position matrix.
@@ -111,10 +149,9 @@ class Molecule:
         """
 
         clone = self.__class__.__new__(self.__class__)
-        Molecule.__init__(
+        Molecule.init(
             self=clone,
             atoms=self._atoms,
-            bonds=self._bonds,
             position_matrix=np.array(position_matrix),
         )
         return clone
@@ -162,6 +199,14 @@ class Molecule:
 
         for atom in self._atoms:
             yield atom
+
+    def get_num_atoms(self):
+        """
+        Return the number of atoms in the molecule.
+
+        """
+
+        return len(self._atoms)
 
     def get_centroid(self, atom_ids=None):
         """
