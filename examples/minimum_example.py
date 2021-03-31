@@ -1,6 +1,5 @@
 import spindry as spd
 
-
 host = spd.Molecule('eg_host.xyz')
 guest = spd.Molecule('eg_guest.xyz')
 
