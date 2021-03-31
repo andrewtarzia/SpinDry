@@ -10,6 +10,8 @@ Molecule class for optimisation.
 
 import numpy as np
 
+from .atom import Atom
+
 
 class Molecule:
     """
@@ -26,15 +28,61 @@ class Molecule:
         path : :class:`str`
             Path to `.xyz` file defining molecule to read.
 
+        Raises
+        ------
+        :class:`RuntimeError`
+            If the number of atoms in the content of the file does not
+            match the number of atoms at the top of the file.
+
         """
 
         # Load in xyz file.
+        with open(path, 'r') as f:
+            atom_count, _, *content = f.readlines()
+
+        # Save all the coords in the file.
+        new_coords = []
+        atoms = []
+        for i, line in enumerate(content):
+            element, *coords = line.split()
+            # Handle XYZ files with capitilisation of element symbols.
+            element = element.title()
+            atoms.append(Atom(id=i, element_string=str(element)))
+            new_coords.append([float(i) for i in coords])
+
+        # Check that the correct number of atom
+        # lines was present in the file.
+        if i+1 != int(atom_count):
+            raise RuntimeError(
+                f'The number of atom lines in the xyz file, {i+1}, '
+                'does not match the number of atoms in the '
+                f'content, {atom_count}.'
+            )
+
+        new_coords = np.array(new_coords)
 
         self._atoms = tuple(atoms)
         self._position_matrix = np.array(
-            position_matrix.T,
+            new_coords.T,
             dtype=np.float64,
         )
+
+    def init(self, atoms, position_matrix):
+        """
+        Init a Molecule with from atoms and position matrix.
+
+        Parameters
+        ----------
+        atoms : :class:`iterable` of :class:`.Atom`
+            Atoms that define the molecule.
+
+        position_matrix : :class:`numpy.ndarray`
+            A position matrix of the clone. The shape of the matrix
+            is ``(n, 3)``.
+
+        """
+        self._atoms = tuple(atoms)
+        self._position_matrix = np.array(position_matrix).T
 
     def get_position_matrix(self):
         """
