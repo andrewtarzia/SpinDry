@@ -40,13 +40,6 @@ def test_molecule_get_atoms(molecule, atoms):
         assert test.get_element_string() == atom.get_element_string()
 
 
-def test_molecule_get_bonds(molecule, bonds):
-    for test, bond in zip(molecule.get_bonds(), bonds):
-        assert test.get_id() == bond.get_id()
-        assert test.get_atom1_id() == bond.get_atom1_id()
-        assert test.get_atom2_id() == bond.get_atom2_id()
-
-
 def test_molecule_get_centroid(
     molecule, position_matrix, centroid
 ):
@@ -56,8 +49,3 @@ def test_molecule_get_centroid(
         test.get_centroid(),
         atol=1E-6,
     ))
-
-
-def test_molecule_get_subunits(molecule, subunits):
-    test = molecule.get_subunits(bond_pair_ids=((0, 3), ))
-    assert test == subunits
