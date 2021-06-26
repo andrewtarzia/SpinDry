@@ -10,10 +10,12 @@ Generator of host guest conformations using nonbonded interactions.
 
 import numpy as np
 
+from itertools import combinations
 from scipy.spatial.distance import cdist
 from copy import deepcopy
 import random
 
+from .molecule import Molecule
 from .supramolecule import SupraMolecule
 from .utilities import rotation_matrix_arbitrary_axis
 
@@ -111,30 +113,28 @@ class Spinner:
             )
         )
 
-    def _compute_nonbonded_potential(
-        self,
-        host_position_matrix,
-        guest_position_matrix
-    ):
-        # Get all pairwise distances between atoms in host and guest.
-        pair_dists = cdist(
-            host_position_matrix, guest_position_matrix
-        )
-        nonbonded_potential = np.sum(
-            self._nonbond_potential(pair_dists.flatten())
-        )
+    def _compute_nonbonded_potential(self, position_matrices):
+        # Get all pairwise distances between atoms in host and guests.
+        nonbonded_potential = 0
+        for pos_mat_pair in combinations(position_matrices, 2):
+            pair_dists = cdist(pos_mat_pair[0], pos_mat_pair[1])
+            nonbonded_potential += np.sum(
+                self._nonbond_potential(pair_dists.flatten())
+            )
 
         return nonbonded_potential
 
-    def _compute_potential(self, host, guest):
-        host_position_matrix = host.get_position_matrix()
-        guest_position_matrix = guest.get_position_matrix()
-        nonbonded_potential = self._compute_nonbonded_potential(
-            host_position_matrix=host_position_matrix,
-            guest_position_matrix=guest_position_matrix,
+    def _compute_potential(self, host, guests):
+        guest_position_matrices = (
+            i.get_position_matrix() for i in guests
         )
-
-        return nonbonded_potential
+        position_matrices = (
+            (host.get_position_matrix(), )
+            + tuple(guest_position_matrices)
+        )
+        return self._compute_nonbonded_potential(
+            position_matrices=position_matrices,
+        )
 
     def _translate_atoms_along_vector(self, mol, vector):
 
@@ -174,14 +174,15 @@ class Spinner:
             else:
                 return False
 
-    def _run_first_step(self, host, guest):
+    def _run_first_step(self, host, guests):
+        nonbonded_potential = self._compute_potential(host, guests)
+        return nonbonded_potential
 
-        host = host.with_centroid([0, 0, 0])
-        guest = guest.with_centroid([0, 0, 0])
-        nonbonded_potential = self._compute_potential(host, guest)
-        return host, guest, nonbonded_potential
+    def _run_step(self, host, guests):
 
-    def _run_step(self, host, guest):
+        # Select a guest randomly to move and reorient.
+        targ_guest_id = random.choice(range(len(guests)))
+        targ_guest = guests[targ_guest_id]
 
         # Random number from -1 to 1 for multiplying translation.
         rand = (random.random() - 0.5) * 2
@@ -192,8 +193,8 @@ class Spinner:
 
         # Perform translation.
         translation_vector = rand_vector * self._step_size * rand
-        guest = self._translate_atoms_along_vector(
-            mol=guest,
+        targ_guest = self._translate_atoms_along_vector(
+            mol=targ_guest,
             vector=translation_vector,
         )
 
@@ -205,17 +206,19 @@ class Spinner:
         rand_axis = rand_axis / np.linalg.norm(rand_vector)
 
         # Perform rotation.
-        guest = self._rotate_atoms_by_angle(
-            mol=guest,
+        targ_guest = self._rotate_atoms_by_angle(
+            mol=targ_guest,
             angle=rotation_angle,
             axis=rand_axis,
-            origin=guest.get_centroid(),
+            origin=targ_guest.get_centroid(),
         )
 
-        nonbonded_potential = self._compute_potential(host, guest)
-        return host, guest, nonbonded_potential
+        guests[targ_guest_id] = targ_guest
 
-    def get_conformers(self, host, guest):
+        nonbonded_potential = self._compute_potential(host, guests)
+        return host, guests, nonbonded_potential
+
+    def get_conformers(self, host, guests):
         """
         Get conformers of guest in host.
 
@@ -224,8 +227,8 @@ class Spinner:
         host : :class:`.Molecule`
             The host molecule.
 
-        guest : :class:`.Molecule`
-            The guest molecule to be manipulated.
+        guests : :class:`.Molecule` or :class:`list` of :class:`Molecule`
+            The guest molecule(s) to be manipulated.
 
         Yields
         ------
@@ -234,23 +237,26 @@ class Spinner:
 
         """
 
+        if isinstance(guests, Molecule):
+            guests = [guests, ]
+
         cid = 0
-        host, guest, nonbonded_potential = self._run_first_step(
+        nonbonded_potential = self._run_first_step(
             host=host,
-            guest=guest,
+            guests=guests,
         )
+
         yield SupraMolecule(
             host=host,
-            guest=guest,
+            guests=guests,
             cid=cid,
             potential=nonbonded_potential,
         )
-
         cids_passed = [cid]
         for step in range(1, self._max_attempts):
-            n_host, n_guest, n_nonbonded_potential = self._run_step(
+            n_host, n_guests, n_nonbonded_potential = self._run_step(
                 host=host,
-                guest=guest,
+                guests=guests,
             )
             passed = self._test_move(
                 curr_pot=nonbonded_potential,
@@ -260,7 +266,7 @@ class Spinner:
                 cid += 1
                 yield SupraMolecule(
                     host=host,
-                    guest=guest,
+                    guests=n_guests,
                     cid=cid,
                     potential=nonbonded_potential,
                 )
@@ -269,9 +275,12 @@ class Spinner:
                 host = host.with_position_matrix(
                     position_matrix=n_host.get_position_matrix()
                 )
-                guest = guest.with_position_matrix(
-                    position_matrix=n_guest.get_position_matrix()
-                )
+                guests = [
+                    i.with_position_matrix(
+                        position_matrix=j.get_position_matrix()
+                    )
+                    for i, j in zip(guests, n_guests)
+                ]
 
             if len(cids_passed) == self._num_conformers:
                 break
