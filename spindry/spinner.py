@@ -267,3 +267,24 @@ class Spinner:
         print(
             f'{len(cids_passed)} conformers generated in {step} steps.'
         )
+
+    def get_final_conformer(self, supramolecule):
+        """
+        Get final conformer of supramolecule.
+
+        Parameters
+        ----------
+        supramolecule : :class:`.SupraMolecule`
+            The supramolecule to optimize.
+
+        Returns
+        -------
+        conformer : :class:`.SupraMolecule`
+            The host-guest supramolecule.
+
+        """
+
+        for conformer in self.get_conformers(supramolecule):
+            continue
+
+        return conformer
