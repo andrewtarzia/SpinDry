@@ -118,27 +118,17 @@ class Spinner:
 
         return nonbonded_potential
 
-    def _compute_potential(self, host, guests):
-        guest_position_matrices = (
-            i.get_position_matrix() for i in guests
-        )
-        position_matrices = (
-            (host.get_position_matrix(), )
-            + tuple(guest_position_matrices)
+    def _compute_potential(self, supramolecule):
+        component_position_matrices = (
+            i.get_position_matrix()
+            for i in supramolecule.get_components()
         )
         return self._compute_nonbonded_potential(
-            position_matrices=position_matrices,
+            position_matrices=component_position_matrices,
         )
 
     def _translate_atoms_along_vector(self, mol, vector):
-
-        new_position_matrix = deepcopy(mol.get_position_matrix())
-        for atom in mol.get_atoms():
-            pos = mol.get_position_matrix()[atom.get_id()]
-            new_position_matrix[atom.get_id()] = pos - vector
-
-        mol = mol.with_position_matrix(new_position_matrix)
-        return mol
+        return mol.with_displacement(vector)
 
     def _rotate_atoms_by_angle(self, mol, angle, axis, origin):
         new_position_matrix = mol.get_position_matrix()
@@ -168,15 +158,20 @@ class Spinner:
             else:
                 return False
 
-    def _run_first_step(self, host, guests):
-        nonbonded_potential = self._compute_potential(host, guests)
-        return nonbonded_potential
+    def _run_step(self, supramolecule):
 
-    def _run_step(self, host, guests):
-
+        component_list = list(supramolecule.get_components())
+        component_sizes = {
+            i: mol.get_num_atoms()
+            for i, mol in enumerate(component_list)
+        }
+        max_size = max(component_sizes.values())
         # Select a guest randomly to move and reorient.
-        targ_guest_id = random.choice(range(len(guests)))
-        targ_guest = guests[targ_guest_id]
+        targ_comp_id = random.choice(range(len(component_list)))
+        # Do not move or rotate largest component.
+        if component_sizes[targ_comp_id] == max_size:
+            targ_comp_id += 1
+        targ_comp = component_list[targ_comp_id]
 
         # Random number from -1 to 1 for multiplying translation.
         rand = (random.random() - 0.5) * 2
@@ -187,8 +182,8 @@ class Spinner:
 
         # Perform translation.
         translation_vector = rand_vector * self._step_size * rand
-        targ_guest = self._translate_atoms_along_vector(
-            mol=targ_guest,
+        targ_comp = self._translate_atoms_along_vector(
+            mol=targ_comp,
             vector=translation_vector,
         )
 
@@ -200,29 +195,29 @@ class Spinner:
         rand_axis = rand_axis / np.linalg.norm(rand_vector)
 
         # Perform rotation.
-        targ_guest = self._rotate_atoms_by_angle(
-            mol=targ_guest,
+        targ_comp = self._rotate_atoms_by_angle(
+            mol=targ_comp,
             angle=rotation_angle,
             axis=rand_axis,
-            origin=targ_guest.get_centroid(),
+            origin=targ_comp.get_centroid(),
         )
 
-        guests[targ_guest_id] = targ_guest
+        component_list[targ_comp_id] = targ_comp
+        supramolecule = SupraMolecule.init_from_components(
+            components=component_list,
+        )
 
-        nonbonded_potential = self._compute_potential(host, guests)
-        return host, guests, nonbonded_potential
+        nonbonded_potential = self._compute_potential(supramolecule)
+        return supramolecule, nonbonded_potential
 
-    def get_conformers(self, host, guests):
+    def get_conformers(self, supramolecule):
         """
-        Get conformers of guest in host.
+        Get conformers of supramolecule.
 
         Parameters
         ----------
-        host : :class:`.Molecule`
-            The host molecule.
-
-        guests : :class:`.Molecule` or :class:`list` of :class:`Molecule`
-            The guest molecule(s) to be manipulated.
+        supramolecule : :class:`.SupraMolecule`
+            The supramolecule to optimize.
 
         Yields
         ------
@@ -231,26 +226,20 @@ class Spinner:
 
         """
 
-        if isinstance(guests, Molecule):
-            guests = [guests, ]
-
         cid = 0
-        nonbonded_potential = self._run_first_step(
-            host=host,
-            guests=guests,
-        )
+        nonbonded_potential = self._compute_potential(supramolecule)
 
         yield SupraMolecule(
-            host=host,
-            guests=guests,
+            atoms=supramolecule.get_atoms(),
+            bonds=supramolecule.get_bonds(),
+            position_matrix=supramolecule.get_position_matrix(),
             cid=cid,
             potential=nonbonded_potential,
         )
         cids_passed = [cid]
         for step in range(1, self._max_attempts):
-            n_host, n_guests, n_nonbonded_potential = self._run_step(
-                host=host,
-                guests=guests,
+            n_supramolecule, n_nonbonded_potential = self._run_step(
+                supramolecule=supramolecule,
             )
             passed = self._test_move(
                 curr_pot=nonbonded_potential,
@@ -258,23 +247,19 @@ class Spinner:
             )
             if passed:
                 cid += 1
-                yield SupraMolecule(
-                    host=host,
-                    guests=n_guests,
+                cids_passed.append(cid)
+                nonbonded_potential = n_nonbonded_potential
+                supramolecule = SupraMolecule(
+                    atoms=supramolecule.get_atoms(),
+                    bonds=supramolecule.get_bonds(),
+                    position_matrix=(
+                        n_supramolecule.get_position_matrix()
+                    ),
                     cid=cid,
                     potential=nonbonded_potential,
                 )
-                cids_passed.append(cid)
-                nonbonded_potential = n_nonbonded_potential
-                host = host.with_position_matrix(
-                    position_matrix=n_host.get_position_matrix()
-                )
-                guests = [
-                    i.with_position_matrix(
-                        position_matrix=j.get_position_matrix()
-                    )
-                    for i, j in zip(guests, n_guests)
-                ]
+
+                yield supramolecule
 
             if len(cids_passed) == self._num_conformers:
                 break
