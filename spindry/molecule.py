@@ -85,8 +85,9 @@ class Molecule:
         new_position_matrix = (
             self._position_matrix.T + displacement
         )
-        return Molecule.init(
+        return Molecule(
             atoms=self._atoms,
+            bonds=self._bonds,
             position_matrix=np.array(new_position_matrix),
         )
 
@@ -102,8 +103,9 @@ class Molecule:
 
         """
 
-        return Molecule.init(
+        return Molecule(
             atoms=self._atoms,
+            bonds=self._bonds,
             position_matrix=np.array(position_matrix),
         )
 
@@ -150,6 +152,20 @@ class Molecule:
 
         for atom in self._atoms:
             yield atom
+
+    def get_bonds(self):
+        """
+        Yield the bonds in the molecule, ordered as input.
+
+        Yields
+        ------
+        :class:`.Bond`
+            A bond in the molecule.
+
+        """
+
+        for bond in self._bonds:
+            yield bond
 
     def get_num_atoms(self):
         """
