@@ -4,18 +4,28 @@ import numpy as np
 
 
 def test_molecule_get_position_matrix(molecule, position_matrix):
-    assert np.all(np.equal(
+    assert np.all(np.allclose(
         position_matrix,
         molecule.get_position_matrix(),
     ))
 
 
-def test_molecule_with_position_matrix(
-    molecule, position_matrix2, position_matrix
-):
+def test_molecule_with_position_matrix(molecule, position_matrix2):
     test = molecule.with_position_matrix(position_matrix2)
-    assert np.all(np.equal(
+    assert np.all(np.allclose(
         position_matrix2,
+        test.get_position_matrix(),
+    ))
+
+
+def test_molecule_with_displacement(
+    molecule,
+    displacement,
+    displaced_position_matrix,
+):
+    test = molecule.with_displacement(displacement)
+    assert np.all(np.allclose(
+        displaced_position_matrix,
         test.get_position_matrix(),
     ))
 
@@ -49,3 +59,7 @@ def test_molecule_get_centroid(
         test.get_centroid(),
         atol=1E-6,
     ))
+
+
+def test_molecule_get_num_atoms(molecule, num_atoms):
+    assert molecule.get_num_atoms() == num_atoms
