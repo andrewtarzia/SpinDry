@@ -101,6 +101,9 @@ class SupraMolecule(Molecule):
         # Produce a graph from the molecule that does not include edges
         # where the bonds to be optimized are.
         mol_graph = nx.Graph()
+        for atom in self.get_atoms():
+            mol_graph.add_node(atom.get_id())
+
         # Add edges.
         for bond in self._bonds:
             pair_ids = (bond.get_atom1_id(), bond.get_atom2_id())

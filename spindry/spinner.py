@@ -165,10 +165,17 @@ class Spinner:
         }
         max_size = max(component_sizes.values())
         # Select a guest randomly to move and reorient.
-        targ_comp_id = random.choice(range(len(component_list)))
-        # Do not move or rotate largest component.
-        if component_sizes[targ_comp_id] == max_size:
-            targ_comp_id += 1
+        # Do not move or rotate largest component if same size.
+        if len(set(component_sizes.values())) > 1:
+            targ_comp_id = random.choice([
+                i for i in range(len(component_list))
+                if component_sizes[i] != max_size
+            ])
+        else:
+            targ_comp_id = random.choice([
+                i for i in range(len(component_list))
+            ])
+
         targ_comp = component_list[targ_comp_id]
 
         # Random number from -1 to 1 for multiplying translation.
