@@ -35,9 +35,8 @@ class Spinner:
         rotation_step_size,
         num_conformers,
         max_attempts=1000,
-        nonbond_epsilon=20,
+        nonbond_epsilon=5,
         nonbond_sigma=1.2,
-        nonbond_mu=3,
         beta=2,
         random_seed=1000,
     ):
@@ -67,11 +66,6 @@ class Spinner:
             Value of sigma used in the nonbond potential in MC moves.
             Defaults to 1.2.
 
-        nonbond_mu : :class:`float`, optional
-            Value of mu used in the nonbond potential in MC moves.
-            Determines the steepness of the nonbond potential.
-            Defaults to 3.
-
         beta : :class:`float`, optional
             Value of beta used in the in MC moves. Beta takes the
             place of the inverse boltzmann temperature.
@@ -90,7 +84,6 @@ class Spinner:
         self._max_attempts = max_attempts
         self._nonbond_epsilon = nonbond_epsilon
         self._nonbond_sigma = nonbond_sigma
-        self._nonbond_mu = nonbond_mu
         self._beta = beta
         if random_seed is None:
             np.random.seed()
@@ -101,7 +94,7 @@ class Spinner:
 
     def _nonbond_potential(self, distance):
         """
-        Define an arbitrary repulsive nonbonded potential.
+        Define a Lennard-Jones nonbonded potential.
 
         This potential has no relation to an empircal forcefield.
 
@@ -109,7 +102,8 @@ class Spinner:
 
         return (
             self._nonbond_epsilon * (
-                (self._nonbond_sigma/distance) ** self._nonbond_mu
+                (self._nonbond_sigma/distance) ** 12
+                - (self._nonbond_sigma/distance) ** 6
             )
         )
 
