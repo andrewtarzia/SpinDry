@@ -10,6 +10,7 @@ SupraMolecule class for optimisation.
 
 import networkx as nx
 from .molecule import Molecule
+import numpy as np
 
 
 class SupraMolecule(Molecule):
@@ -59,9 +60,37 @@ class SupraMolecule(Molecule):
         self._cid = cid
         self._potential = potential
 
-    def _write_xyz_content(self):
-        content = [0]
+    @classmethod
+    def init_from_components(cls, components):
+        """
+        Initialize a :class:`Supramolecule` instance from components.
 
+        Parameters
+        ----------
+        components : :class:`iterable` of :class:`.Molecule`
+            Molecular components that define the supramolecule.
+
+        """
+
+        atoms = []
+        bonds = []
+        position_matrix = []
+        for comp in components:
+            for a in comp.get_atoms():
+                atoms.append(a)
+            for b in comp.get_bonds():
+                bonds.append(b)
+            for pos in comp.get_position_matrix():
+                position_matrix.append(pos)
+
+        supramolecule = cls.__new__(cls)
+        supramolecule._atoms = tuple(atoms)
+        supramolecule._bonds = tuple(bonds)
+        supramolecule._components = tuple(components)
+        supramolecule._cid = None
+        supramolecule._potential = None
+        supramolecule._position_matrix = np.array(position_matrix).T
+        return supramolecule
 
     def _define_components(self):
         """
@@ -95,8 +124,20 @@ class SupraMolecule(Molecule):
 
         self._components = tuple(comps)
 
+    def _write_xyz_content(self):
+        """
+        Write basic `.xyz` file content of Molecule.
+
+        """
+        coords = self.get_position_matrix()
+        content = [0]
+        for i, atom in enumerate(self.get_atoms(), 1):
+            x, y, z = (i for i in coords[atom.get_id()])
+            content.append(
+                f'{atom.get_element_string()} {x:f} {y:f} {z:f}\n'
+            )
         # Set first line to the atom_count.
-        content[0] = f'{i+j}\ncid:{self._cid}, pot:{self._potential}\n'
+        content[0] = f'{i}\ncid:{self._cid}, pot: {self._potential}\n'
 
         return content
 
@@ -119,6 +160,7 @@ class SupraMolecule(Molecule):
         return repr(self)
 
     def __repr__(self):
+        comps = ', '.join([str(i) for i in self.get_components()])
         return (
             f'{self.__class__.__name__}('
             f'{len(list(self.get_components()))} components, '
