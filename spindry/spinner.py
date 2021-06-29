@@ -12,10 +12,8 @@ import numpy as np
 
 from itertools import combinations
 from scipy.spatial.distance import cdist
-from copy import deepcopy
 import random
 
-from .molecule import Molecule
 from .supramolecule import SupraMolecule
 from .utilities import rotation_matrix_arbitrary_axis
 
