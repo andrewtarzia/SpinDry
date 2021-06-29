@@ -215,7 +215,7 @@ class Spinner:
         nonbonded_potential = self._compute_potential(supramolecule)
         return supramolecule, nonbonded_potential
 
-    def get_conformers(self, supramolecule):
+    def get_conformers(self, supramolecule, verbose=False):
         """
         Get conformers of supramolecule.
 
@@ -223,6 +223,9 @@ class Spinner:
         ----------
         supramolecule : :class:`.SupraMolecule`
             The supramolecule to optimize.
+
+        verbose : :class:`bool`
+            `True` to print some extra information.
 
         Yields
         ------
@@ -269,9 +272,11 @@ class Spinner:
             if len(cids_passed) == self._num_conformers:
                 break
 
-        print(
-            f'{len(cids_passed)} conformers generated in {step} steps.'
-        )
+        if verbose:
+            print(
+                f'{len(cids_passed)} conformers generated in {step} '
+                'steps.'
+            )
 
     def get_final_conformer(self, supramolecule):
         """
