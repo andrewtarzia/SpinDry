@@ -8,6 +8,7 @@ SupraMolecule class for optimisation.
 
 """
 
+import networkx as nx
 from .molecule import Molecule
 
 
@@ -61,31 +62,52 @@ class SupraMolecule(Molecule):
     def _write_xyz_content(self):
         content = [0]
 
-        host_coords = self._host.get_position_matrix()
-        for i, atom in enumerate(self._host.get_atoms(), 1):
-            x, y, z = (i for i in host_coords[atom.get_id()])
-            content.append(
-                f'{atom.get_element_string()} {x:f} {y:f} {z:f}\n'
+
+    def _define_components(self):
+        """
+        Define disconnected component molecules as :class:`.Molecule`s.
+
+        """
+
+        # Produce a graph from the molecule that does not include edges
+        # where the bonds to be optimized are.
+        mol_graph = nx.Graph()
+        # Add edges.
+        for bond in self._bonds:
+            pair_ids = (bond.get_atom1_id(), bond.get_atom2_id())
+            mol_graph.add_edge(*pair_ids)
+
+        # Get atom ids in disconnected subgraphs.
+        comps = []
+        for c in nx.connected_components(mol_graph):
+            in_atoms = [
+                i for i in self._atoms
+                if i.get_id() in c
+            ]
+            in_bonds = [
+                i for i in self._bonds
+                if i.get_atom1_id() in c and i.get_atom2_id() in c
+            ]
+            new_pos_matrix = self._position_matrix[:, list(c)].T
+            comps.append(
+                Molecule(in_atoms, in_bonds, new_pos_matrix)
             )
 
-        for guest in self._guests:
-            guest_coords = guest.get_position_matrix()
-            for j, atom in enumerate(guest.get_atoms(), 1):
-                x, y, z = (i for i in guest_coords[atom.get_id()])
-                content.append(
-                    f'{atom.get_element_string()} {x:f} {y:f} {z:f}\n'
-                )
+        self._components = tuple(comps)
 
         # Set first line to the atom_count.
         content[0] = f'{i+j}\ncid:{self._cid}, pot:{self._potential}\n'
 
         return content
 
-    def get_host(self):
-        return self._host
+    def get_components(self):
+        """
+        Yields each molecular component.
 
-    def get_guests(self):
-        return self._guests
+        """
+
+        for i in self._components:
+            yield i
 
     def get_cid(self):
         return self._cid
@@ -97,4 +119,8 @@ class SupraMolecule(Molecule):
         return repr(self)
 
     def __repr__(self):
-        return (f'<{self.__class__.__name__} at {id(self)}>')
+        return (
+            f'{self.__class__.__name__}('
+            f'{len(list(self.get_components()))} components, '
+            f'{comps})'
+        )
