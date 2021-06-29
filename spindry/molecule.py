@@ -56,21 +56,6 @@ class Molecule:
 
         return np.array(self._position_matrix.T)
 
-    def with_centroid(self, position):
-        """
-        Return clone Molecule at position.
-
-        Parameters
-        ----------
-        position : :class:`numpy.ndarray`
-            The position of the centroid. The shape of the matrix
-            is ``(3, )``.
-
-        """
-
-        centroid = self.get_centroid()
-        return self.with_displacement(position-centroid)
-
     def with_displacement(self, displacement):
         """
         Return a displaced clone Molecule.
