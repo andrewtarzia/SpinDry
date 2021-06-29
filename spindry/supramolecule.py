@@ -17,34 +17,44 @@ class SupraMolecule(Molecule):
 
     """
 
-    def __init__(self, host, guests, cid, potential):
+    def __init__(
+        self,
+        atoms,
+        bonds,
+        position_matrix,
+        cid=None,
+        potential=None,
+    ):
         """
-        Initialize a :class:`Molecule` instance.
+        Initialize a :class:`Supramolecule` instance.
 
         Parameters
         ----------
-        host : :class:`.Molecule`
-            The host molecule.
+        atoms : :class:`iterable` of :class:`.Atom`
+            Atoms that define the molecule.
 
-        guests : :class:`list` of :class:`Molecule`
-            The guest molecules.
+        bonds : :class:`iterable` of :class:`.Bond`
+            Bonds between atoms that define the molecule.
 
-        cid : :class:`int`
+        position_matrix : :class:`numpy.ndarray`
+            A ``(n, 3)`` matrix holding the position of every atom in
+            the :class:`.Molecule`.
+
+        cid : :class:`int`, optional
             Conformer id of supramolecule.
 
-        potential : :class:`float`
+        potential : :class:`float`, optional
             Potential energy of Supramolecule.
-
-        Raises
-        ------
-        :class:`RuntimeError`
-            If the number of atoms in the content of the file does not
-            match the number of atoms at the top of the file.
 
         """
 
-        self._host = host
-        self._guests = guests
+        self._atoms = tuple(atoms)
+        self._bonds = tuple(bonds)
+        self._position_matrix = np.array(
+            position_matrix.T,
+            dtype=np.float64,
+        )
+        self._define_components()
         self._cid = cid
         self._potential = potential
 
