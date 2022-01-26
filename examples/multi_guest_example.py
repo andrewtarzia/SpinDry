@@ -14,15 +14,20 @@ cage = stk.ConstructedMolecule(
     ),
 )
 cage.write('poc.mol')
+# Always ensure initial structures are not entirely on top of each
+# other.
 stk_guests = (
-    stk.BuildingBlock('CN1C=NC2=C1C(=O)N(C(=O)N2C)C'),
-    stk.BuildingBlock('c1ccccc1'),
+    (stk.BuildingBlock('CN1C=NC2=C1C(=O)N(C(=O)N2C)C'), (0., 0., 0.)),
+    (stk.BuildingBlock('c1ccccc1'), (0., 2., 0.)),
 )
 
 host_guest = stk.ConstructedMolecule(
     topology_graph=stk.host_guest.Complex(
         host=stk.BuildingBlock.init_from_molecule(cage),
-        guests=[stk.host_guest.Guest(i) for i in stk_guests],
+        guests=[
+            stk.host_guest.Guest(i[0], displacement=i[1])
+            for i in stk_guests
+        ],
     )
 )
 host_guest.write('host_multi_guest.mol')
