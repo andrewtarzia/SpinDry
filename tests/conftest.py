@@ -5,9 +5,9 @@ import spindry as spd
 
 @pytest.fixture(
     params=(
-        (spd.Atom(id=0, element_string='N'), 0, 'N'),
-        (spd.Atom(id=65, element_string='P'), 65, 'P'),
-        (spd.Atom(id=2, element_string='C'), 2, 'C'),
+        (spd.Atom(id=0, element_string='N'), 0, 'N', 1.4882656711484),
+        (spd.Atom(id=65, element_string='P'), 65, 'P', 1.925513788),
+        (spd.Atom(id=2, element_string='C'), 2, 'C', 1.60775485914852),
     )
 )
 def atom_info(request):
@@ -106,14 +106,14 @@ def nonbond_potentials():
 
 @pytest.fixture
 def final_potential():
-    return -0.05789661705160683
+    return -0.0564393681661353
 
 
 @pytest.fixture
 def final_pos_mat():
     return np.array([
-        [0.29028551,  1.12756372, -1.21825898],
-        [1.23559041,  2.11685589,  0.89545513]
+        [-0.02514959, -0.50457139, -0.20141202],
+        [ 1.31683193,  2.57903968,  0.21028248]
     ])
 
 
@@ -124,3 +124,13 @@ def spinner():
         rotation_step_size=5,
         num_conformers=50,
     )
+
+
+@pytest.fixture
+def radii_combinations():
+    return [
+        (1.24235230881914, 1.24235230881914, 1.24235230881914),
+        (1.24235230881914, 2.056812828, 1.64958256840957),
+        (1.75038091053539, 1.24235230881914, 1.496366609677265),
+        (1.60775485914852, 1.4882656711484, 1.54801026514846),
+    ]

@@ -34,7 +34,6 @@ class Spinner:
         num_conformers,
         max_attempts=1000,
         nonbond_epsilon=5,
-        nonbond_sigma=1.2,
         beta=2,
         random_seed=1000,
     ):
@@ -60,10 +59,6 @@ class Spinner:
             Determines strength of the nonbond potential.
             Defaults to 20.
 
-        nonbond_sigma : :class:`float`, optional
-            Value of sigma used in the nonbond potential in MC moves.
-            Defaults to 1.2.
-
         beta : :class:`float`, optional
             Value of beta used in the in MC moves. Beta takes the
             place of the inverse boltzmann temperature.
@@ -81,7 +76,6 @@ class Spinner:
         self._rotation_step_size = rotation_step_size
         self._max_attempts = max_attempts
         self._nonbond_epsilon = nonbond_epsilon
-        self._nonbond_sigma = nonbond_sigma
         self._beta = beta
         if random_seed is None:
             np.random.seed()
@@ -90,7 +84,7 @@ class Spinner:
             np.random.seed(random_seed)
             random.seed(random_seed)
 
-    def _nonbond_potential(self, distance):
+    def _nonbond_potential(self, distance, sigmas):
         """
         Define a Lennard-Jones nonbonded potential.
 
@@ -100,18 +94,44 @@ class Spinner:
 
         return (
             self._nonbond_epsilon * (
-                (self._nonbond_sigma/distance) ** 12
-                - (self._nonbond_sigma/distance) ** 6
+                (sigmas/distance) ** 12 - (sigmas/distance) ** 6
             )
         )
 
-    def _compute_nonbonded_potential(self, position_matrices):
-        # Get all pairwise distances between atoms in host and guests.
+    def _mixing_function(self, val1, val2):
+        return (val1 + val2) / 2
+
+    def _combine_sigma(self, radii1, radii2):
+        """
+        Combine radii using Lorentz-Berthelot rules.
+
+        """
+
+        len1 = len(radii1)
+        len2 = len(radii2)
+
+        mixed = np.zeros((len1, len2))
+        for i in range(len1):
+            for j in range(len2):
+                mixed[i, j] = self._mixing_function(
+                    radii1[i], radii2[j],
+                )
+
+        return mixed
+
+    def _compute_nonbonded_potential(self, position_matrices, radii):
         nonbonded_potential = 0
-        for pos_mat_pair in combinations(position_matrices, 2):
+        for pos_mat_pair, radii_pair in zip(
+            combinations(position_matrices, 2),
+            combinations(radii, 2),
+        ):
             pair_dists = cdist(pos_mat_pair[0], pos_mat_pair[1])
+            sigmas =  self._combine_sigma(radii_pair[0], radii_pair[1])
             nonbonded_potential += np.sum(
-                self._nonbond_potential(pair_dists.flatten())
+                self._nonbond_potential(
+                    distance=pair_dists.flatten(),
+                    sigmas=sigmas.flatten(),
+                )
             )
 
         return nonbonded_potential
@@ -121,8 +141,13 @@ class Spinner:
             i.get_position_matrix()
             for i in supramolecule.get_components()
         )
+        component_radii = (
+            tuple(j.get_radius() for j in i.get_atoms())
+            for i in supramolecule.get_components()
+        )
         return self._compute_nonbonded_potential(
             position_matrices=component_position_matrices,
+            radii=component_radii,
         )
 
     def _translate_atoms_along_vector(self, mol, vector):
