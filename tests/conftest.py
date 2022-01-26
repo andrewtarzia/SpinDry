@@ -5,9 +5,9 @@ import spindry as spd
 
 @pytest.fixture(
     params=(
-        (spd.Atom(id=0, element_string='N'), 0, 'N'),
-        (spd.Atom(id=65, element_string='P'), 65, 'P'),
-        (spd.Atom(id=2, element_string='C'), 2, 'C'),
+        (spd.Atom(id=0, element_string='N'), 0, 'N', 1.4882656711484),
+        (spd.Atom(id=65, element_string='P'), 65, 'P', 1.925513788),
+        (spd.Atom(id=2, element_string='C'), 2, 'C', 1.60775485914852),
     )
 )
 def atom_info(request):
