@@ -130,5 +130,6 @@ dmypy.json
 
 # Ignore tests output
 test_opt_output/
+examples/environment.yml
 
 .vscode
