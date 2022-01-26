@@ -33,7 +33,7 @@ class Atom:
 
         self._id = id
         self._element_string = element_string
-        self._radii = get_radius(element_string)
+        self._radius = get_radius(element_string)
 
     def get_id(self):
         """
@@ -49,13 +49,13 @@ class Atom:
         """
         return self._element_string
 
-    def get_radii(self):
+    def get_radius(self):
         """
-        Get atomic radii (STREUSEL).
+        Get atomic radius (STREUSEL).
 
         """
 
-        return self._radii
+        return self._radius
 
     def __str__(self):
         return repr(self)
