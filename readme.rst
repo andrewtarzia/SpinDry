@@ -19,9 +19,9 @@ Algorithm
 
 SpinDry implements a simple Metropolis Monte-Carlo algorithm to translate and rotate the guest molecules.
 All atom positions/bond lengths within the host and guest are kept rigid and do not contribute to the potential energy.
-The algorithm uses a simple Lennard-Jones nonbonded potential to define the potential energy surface such that steric clashes are avoided.
+The algorithm uses, by default, a simple Lennard-Jones nonbonded potential to define the potential energy surface such that steric clashes are avoided. Atom radii are taken from STREUSSEL (<https://github.com/hmsoregon/STREUSEL>). Custom potential functions can also be defined now -- see `examples/custom_potential_function.py`.
 
-The MC algorithm is as follows:
+The default MC algorithm is as follows:
 
 For ``step`` in *N* steps:
     1. Define a translation of the guest by a random unit-vector and a random [-1, 1) step along the that vector.
