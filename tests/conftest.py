@@ -137,6 +137,11 @@ def spinner():
 
 
 @pytest.fixture
+def spdpotential():
+    return spd.SpdPotential()
+
+
+@pytest.fixture
 def radii_combinations():
     return [
         (1.24235230881914, 1.24235230881914, 1.24235230881914),
