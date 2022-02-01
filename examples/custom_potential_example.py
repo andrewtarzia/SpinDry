@@ -1,7 +1,7 @@
 import stk
 import spindry as spd
 import numpy as np
-from scipy.spatial import distance_matrix
+from scipy.spatial.distance import cdist
 
 
 # Building a cage from the examples on the stk docs.
@@ -97,73 +97,35 @@ for i in np.arange(1, 2.1, 0.1):
     print(round(i, 2), round(conformer.get_potential(), 3))
 
 
-class YoungPotFn(spd.Potential):
+class CentroidFn(spd.Potential):
     """
-    Repulsion energy function from cgbind.
-
-    `cage_subst_repulsion_func` in `add_substrate.py`.
-
-    https://github.com/duartegroup/cgbind
+    A potential function based on the minimum host-guest distance.
 
     """
-
-    def __init__(self, with_attraction):
-        self._with_attraction = with_attraction
-        super().__init__()
 
     def compute_potential(self, supramolecule):
-        component_position_matrices = list(
-            i.get_position_matrix()
+        centroids = list(
+            i.get_centroid()
             for i in supramolecule.get_components()
         )
-        component_radii = list(
-            tuple(j.get_radius() for j in i.get_atoms())
-            for i in supramolecule.get_components()
-        )
-        dist_mat = distance_matrix(
-            component_position_matrices[0],
-            component_position_matrices[1],
-        )
-        # Matrix with the pairwise additions of the vdW radii
-        sum_vdw_radii = np.add.outer(
-            np.array(component_radii[0]),
-            np.array(component_radii[1]),
-        )
 
-        # Magic numbers derived from fitting potentials to noble
-        # gas dimers and plotting against the sum of vdw radii.
-        print(
-            'warning: these parameters are defined based on radii '
-            'defined in cgbind!!!!'
-        )
-        b_mat = 0.083214 * sum_vdw_radii - 0.003768
-        a_mat = 11.576415 * (0.175541 * sum_vdw_radii + 0.316642)
-        exponent_mat = -(dist_mat / b_mat) + a_mat
-
-        energy_mat = np.exp(exponent_mat)
-        energy = np.sum(energy_mat)
-
-        # E is negative for favourable binding but this is a purely
-        # repulsive function so subtract a number.. which is determined
-        # from the best classifier for 102 binding affinities (see
-        # cgbind paper) 0.4 kcal mol-1.
-        if self._with_attraction:
-            return energy - 0.4 * len(component_radii[1])
-        return energy
+        return (10/np.linalg.norm(centroids[1]-centroids[0]))
 
 
-for wt in [True, False]:
-    # Do not want to move, just get energy.
-    cg = spd.Spinner(
-        step_size=0,
-        rotation_step_size=0,
-        num_conformers=1,
-        max_attempts=1,
-        potential_function=YoungPotFn(wt),
-    )
+# Do not want to move, just get energy.
+cg = spd.Spinner(
+    step_size=1,
+    rotation_step_size=2,
+    num_conformers=100,
+    max_attempts=1000,
+    potential_function=CentroidFn(),
+)
 
-    conformer = cg.get_final_conformer(supramolecule)
-    print(
-        f'T Young potential (attr={wt}): ',
-        round(conformer.get_potential(), 3),
-    )
+for conformer in cg.get_conformers(supramolecule):
+    print(conformer.get_cid(), conformer.get_potential())
+
+# Write optimised structure out.
+opt_host_guest = host_guest.with_position_matrix(
+    conformer.get_position_matrix()
+)
+opt_host_guest.write('custom_pot_fn_out.mol')
