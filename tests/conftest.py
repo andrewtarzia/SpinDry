@@ -96,12 +96,22 @@ def smolecule(atoms, position_matrix):
 
 
 @pytest.fixture
+def distances():
+    return np.array([1, 1.2, 1.4, 1.6, 1.8, 2.0, 4])
+
+
+@pytest.fixture
 def nonbond_potentials():
     return [
         29.650582241279984, 0.0, -1.1965106134640058,
         -0.7315108180046076, -0.40042074284821816,
         -0.22239608831999993, -0.0036423427949999992
     ]
+
+
+@pytest.fixture
+def nb_mins():
+    return [1, 2, 4, 3]
 
 
 @pytest.fixture
@@ -124,6 +134,11 @@ def spinner():
         rotation_step_size=5,
         num_conformers=50,
     )
+
+
+@pytest.fixture
+def spdpotential():
+    return spd.SpdPotential()
 
 
 @pytest.fixture

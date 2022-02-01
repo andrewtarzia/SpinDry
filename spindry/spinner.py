@@ -10,12 +10,11 @@ Generator of host guest conformations using nonbonded interactions.
 
 import numpy as np
 
-from itertools import combinations
-from scipy.spatial.distance import cdist
 import random
 
 from .supramolecule import SupraMolecule
 from .utilities import rotation_matrix_arbitrary_axis
+from .potential import SpdPotential
 
 
 class Spinner:
@@ -33,7 +32,7 @@ class Spinner:
         rotation_step_size,
         num_conformers,
         max_attempts=1000,
-        nonbond_epsilon=5,
+        potential_function=SpdPotential(5),
         beta=2,
         random_seed=1000,
     ):
@@ -54,10 +53,9 @@ class Spinner:
         max_attempts : :class:`int`
             Maximum number of MC moves to try to generate conformers.
 
-        nonbond_epsilon : :class:`float`, optional
-            Value of epsilon used in the nonbond potential in MC moves.
-            Determines strength of the nonbond potential.
-            Defaults to 20.
+        potential_function : :class:`spd.Potential`
+            Function to calculate potential energy of a
+            :class:`spd.Supramolecule`
 
         beta : :class:`float`, optional
             Value of beta used in the in MC moves. Beta takes the
@@ -75,7 +73,7 @@ class Spinner:
         self._num_conformers = num_conformers
         self._rotation_step_size = rotation_step_size
         self._max_attempts = max_attempts
-        self._nonbond_epsilon = nonbond_epsilon
+        self._potential_function = potential_function
         self._beta = beta
         if random_seed is None:
             np.random.seed()
@@ -84,70 +82,9 @@ class Spinner:
             np.random.seed(random_seed)
             random.seed(random_seed)
 
-    def _nonbond_potential(self, distance, sigmas):
-        """
-        Define a Lennard-Jones nonbonded potential.
-
-        This potential has no relation to an empircal forcefield.
-
-        """
-
-        return (
-            self._nonbond_epsilon * (
-                (sigmas/distance) ** 12 - (sigmas/distance) ** 6
-            )
-        )
-
-    def _mixing_function(self, val1, val2):
-        return (val1 + val2) / 2
-
-    def _combine_sigma(self, radii1, radii2):
-        """
-        Combine radii using Lorentz-Berthelot rules.
-
-        """
-
-        len1 = len(radii1)
-        len2 = len(radii2)
-
-        mixed = np.zeros((len1, len2))
-        for i in range(len1):
-            for j in range(len2):
-                mixed[i, j] = self._mixing_function(
-                    radii1[i], radii2[j],
-                )
-
-        return mixed
-
-    def _compute_nonbonded_potential(self, position_matrices, radii):
-        nonbonded_potential = 0
-        for pos_mat_pair, radii_pair in zip(
-            combinations(position_matrices, 2),
-            combinations(radii, 2),
-        ):
-            pair_dists = cdist(pos_mat_pair[0], pos_mat_pair[1])
-            sigmas =  self._combine_sigma(radii_pair[0], radii_pair[1])
-            nonbonded_potential += np.sum(
-                self._nonbond_potential(
-                    distance=pair_dists.flatten(),
-                    sigmas=sigmas.flatten(),
-                )
-            )
-
-        return nonbonded_potential
-
     def _compute_potential(self, supramolecule):
-        component_position_matrices = (
-            i.get_position_matrix()
-            for i in supramolecule.get_components()
-        )
-        component_radii = (
-            tuple(j.get_radius() for j in i.get_atoms())
-            for i in supramolecule.get_components()
-        )
-        return self._compute_nonbonded_potential(
-            position_matrices=component_position_matrices,
-            radii=component_radii,
+        return self._potential_function.compute_potential(
+            supramolecule
         )
 
     def _translate_atoms_along_vector(self, mol, vector):
