@@ -32,7 +32,6 @@ host_guest = stk.ConstructedMolecule(
         ],
     )
 )
-host_guest.write('host_multi_guest.mol')
 
 supramolecule = spd.SupraMolecule(
     atoms=(
@@ -120,10 +119,7 @@ cg = spd.Spinner(
     max_attempts=1000,
     potential_function=CentroidFn(),
 )
-
-for conformer in cg.get_conformers(supramolecule):
-    print(conformer.get_cid(), conformer.get_potential())
-
+conformer = cg.get_final_conformer(supramolecule)
 # Write optimised structure out.
 opt_host_guest = host_guest.with_position_matrix(
     conformer.get_position_matrix()
