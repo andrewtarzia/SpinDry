@@ -118,7 +118,7 @@ class Spinner:
             else:
                 return False
 
-    def _run_step(self, supramolecule):
+    def _run_step(self, supramolecule, movable_components):
 
         component_list = list(supramolecule.get_components())
         component_sizes = {
@@ -126,16 +126,24 @@ class Spinner:
             for i, mol in enumerate(component_list)
         }
         max_size = max(component_sizes.values())
+
         # Select a guest randomly to move and reorient.
         # Do not move or rotate largest component if same size.
+        if movable_components is None:
+            movable_components = tuple(
+                i for i in range(len(component_list))
+            )
+
         if len(set(component_sizes.values())) > 1:
             targ_comp_id = random.choice([
                 i for i in range(len(component_list))
                 if component_sizes[i] != max_size
+                if i in movable_components
             ])
         else:
             targ_comp_id = random.choice([
                 i for i in range(len(component_list))
+                if i in movable_components
             ])
 
         targ_comp = component_list[targ_comp_id]
@@ -177,7 +185,12 @@ class Spinner:
         nonbonded_potential = self._compute_potential(supramolecule)
         return supramolecule, nonbonded_potential
 
-    def get_conformers(self, supramolecule, verbose=False):
+    def get_conformers(
+        self,
+        supramolecule,
+        movable_components=None,
+        verbose=False,
+    ):
         """
         Get conformers of supramolecule.
 
@@ -185,6 +198,10 @@ class Spinner:
         ----------
         supramolecule : :class:`.SupraMolecule`
             The supramolecule to optimize.
+
+        movable_components : :class:`iterable` of :class:`int`,
+        optional
+            Components of supramolecule to move during simulation.
 
         verbose : :class:`bool`
             `True` to print some extra information.
@@ -210,6 +227,7 @@ class Spinner:
         for step in range(1, self._max_attempts):
             n_supramolecule, n_nonbonded_potential = self._run_step(
                 supramolecule=supramolecule,
+                movable_components=movable_components,
             )
             passed = self._test_move(
                 curr_pot=nonbonded_potential,
@@ -240,7 +258,11 @@ class Spinner:
                 'steps.'
             )
 
-    def get_final_conformer(self, supramolecule):
+    def get_final_conformer(
+        self,
+        supramolecule,
+        movable_components=None,
+    ):
         """
         Get final conformer of supramolecule.
 
@@ -249,6 +271,10 @@ class Spinner:
         supramolecule : :class:`.SupraMolecule`
             The supramolecule to optimize.
 
+        movable_components : :class:`iterable` of :class:`int`,
+        optional
+            Components of supramolecule to move during simulation.
+
         Returns
         -------
         conformer : :class:`.SupraMolecule`
@@ -256,7 +282,10 @@ class Spinner:
 
         """
 
-        for conformer in self.get_conformers(supramolecule):
+        for conformer in self.get_conformers(
+            supramolecule=supramolecule,
+            movable_components=movable_components,
+        ):
             continue
 
         return conformer
