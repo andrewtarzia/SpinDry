@@ -149,3 +149,21 @@ def radii_combinations():
         (1.75038091053539, 1.24235230881914, 1.496366609677265),
         (1.60775485914852, 1.4882656711484, 1.54801026514846),
     ]
+
+
+@pytest.fixture
+def final_potential2():
+    return -0.11931353919461599
+
+
+@pytest.fixture
+def final_pos_mat2():
+    return np.array([
+        [0., 0., 0.],
+        [0.55315151,  2.61708819, -1.322678]
+    ])
+
+
+@pytest.fixture
+def movable_components():
+    return (1, )
