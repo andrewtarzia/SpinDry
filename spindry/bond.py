@@ -32,7 +32,7 @@ class Bond:
 
         self._id = id
         if len(set(atom_ids)) == 0:
-            raise ValueError('Two distict atom ids are required.')
+            raise ValueError('Two distinct atom ids are required.')
         self._atom1_id, self._atom2_id = sorted(atom_ids)
 
     def get_id(self):
