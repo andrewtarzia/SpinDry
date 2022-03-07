@@ -225,7 +225,7 @@ class Spinner:
             cid=cid,
             potential=nonbonded_potential,
         )
-        cids_passed = [cid]
+        cids_passed = []
         for step in range(1, self._max_attempts):
             n_supramolecule, n_nonbonded_potential = self._run_step(
                 supramolecule=supramolecule,
