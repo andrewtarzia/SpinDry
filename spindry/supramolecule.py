@@ -9,8 +9,11 @@ SupraMolecule class for optimisation.
 """
 
 import networkx as nx
-from .molecule import Molecule
 import numpy as np
+
+from .molecule import Molecule
+from .atom import Atom
+from .bond import Bond
 
 
 class SupraMolecule(Molecule):
@@ -75,11 +78,35 @@ class SupraMolecule(Molecule):
         atoms = []
         bonds = []
         position_matrix = []
+        # Map old atom ids in components to atom ids in supramolecule.
+        atom_id_map = {}
+        bond_id_map = {}
         for comp in components:
             for a in comp.get_atoms():
-                atoms.append(a)
+                if len(atom_id_map) == 0:
+                    atom_id_map[a.get_id()] = 0
+                else:
+                    atom_id_map[a.get_id()] = max(
+                        [i for i in atom_id_map.values()]
+                    )+1
+                atoms.append(Atom(
+                    id=atom_id_map[a.get_id()],
+                    element_string=a.get_element_string(),
+                ))
             for b in comp.get_bonds():
-                bonds.append(b)
+                if len(bond_id_map) == 0:
+                    bond_id_map[b.get_id()] = 0
+                else:
+                    bond_id_map[b.get_id()] = max(
+                        [i for i in bond_id_map.values()]
+                    )+1
+                bonds.append(Bond(
+                    id=bond_id_map[b.get_id()],
+                    atom_ids=(
+                        atom_id_map[b.get_atom1_id()],
+                        atom_id_map[b.get_atom2_id()],
+                    )
+                ))
             for pos in comp.get_position_matrix():
                 position_matrix.append(pos)
 
@@ -112,6 +139,7 @@ class SupraMolecule(Molecule):
         # Get atom ids in disconnected subgraphs.
         comps = []
         for c in nx.connected_components(mol_graph):
+            c_ids = sorted(c)
             in_atoms = [
                 i for i in self._atoms
                 if i.get_id() in c
@@ -120,7 +148,7 @@ class SupraMolecule(Molecule):
                 i for i in self._bonds
                 if i.get_atom1_id() in c and i.get_atom2_id() in c
             ]
-            new_pos_matrix = self._position_matrix[:, list(c)].T
+            new_pos_matrix = self._position_matrix[:, list(c_ids)].T
             comps.append(
                 Molecule(in_atoms, in_bonds, new_pos_matrix)
             )
