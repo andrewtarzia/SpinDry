@@ -21,18 +21,31 @@ def test_opt_test_move(spinner):
 
 def test_opt_setcomp(
     spinner,
-    smolecule,
-    final_pos_mat2,
-    final_potential2,
-    movable_components,
+    smolecule_components,
+    final_comp_pos_mat1,
+    movable_components1,
 ):
-    test = spinner.get_final_conformer(smolecule, movable_components)
+    test = spinner.get_final_conformer(
+        smolecule_components, movable_components1,
+    )
     print(test.get_position_matrix())
     assert np.all(np.allclose(
-        final_pos_mat2,
+        final_comp_pos_mat1,
         test.get_position_matrix(),
     ))
-    assert np.isclose(
-        spinner._compute_potential(test),
-        final_potential2
+
+
+def test_opt_setcomp(
+    spinner,
+    smolecule_components,
+    final_comp_pos_mat2,
+    movable_components2,
+):
+    test = spinner.get_final_conformer(
+        smolecule_components, movable_components2,
     )
+    print(test.get_position_matrix())
+    assert np.all(np.allclose(
+        final_comp_pos_mat2,
+        test.get_position_matrix(),
+    ))

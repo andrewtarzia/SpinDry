@@ -152,18 +152,46 @@ def radii_combinations():
 
 
 @pytest.fixture
-def final_potential2():
-    return -0.11931353919461599
-
-
-@pytest.fixture
-def final_pos_mat2():
+def three_position_matrix():
     return np.array([
-        [0., 0., 0.],
-        [0.55315151,  2.61708819, -1.322678]
+        [0, 0, 0],
+        [0, 1.5, 0],
+        [0, 3.0, 0]
     ])
 
 
 @pytest.fixture
-def movable_components():
+def smolecule_components(three_position_matrix):
+    return spd.SupraMolecule(
+        atoms=[spd.Atom(0, 'C'), spd.Atom(1, 'C'), spd.Atom(2, 'C')],
+        bonds=[spd.Bond(0, (0, 1))],
+        position_matrix=three_position_matrix,
+    )
+
+
+@pytest.fixture
+def movable_components1():
     return (1, )
+
+
+@pytest.fixture
+def final_comp_pos_mat1():
+    return np.array([
+        [0, 0, 0],
+        [1.39723851,  0.74108939, -0.6065934],
+        [0.27007492,  1.3135034 ,  0.20077543],
+    ])
+
+
+@pytest.fixture
+def movable_components2():
+    return (0, )
+
+
+@pytest.fixture
+def final_comp_pos_mat2():
+    return np.array([
+        [1.39723851,  0.74108939, -0.6065934],
+        [0.27007492,  1.3135034 ,  0.20077543],
+        [0, 3.0, 0],
+    ])

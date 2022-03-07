@@ -127,24 +127,26 @@ class Spinner:
         }
         max_size = max(component_sizes.values())
 
-        # Select a guest randomly to move and reorient.
-        # Do not move or rotate largest component if same size.
+        # If movable components not set, select a guest randomly to
+        # move and reorient.
+        # Do not move or rotate largest component.
         if movable_components is None:
-            movable_components = tuple(
-                i for i in range(len(component_list))
-            )
+            # If there are different sizes.
+            if len(set(component_sizes.values())) > 1:
+                movable_components = tuple(
+                    i for i in range(len(component_list))
+                    if component_sizes[i] != max_size
+                )
+            # Else capture all!
+            else:
+                movable_components = tuple(
+                    i for i in range(len(component_list))
+                )
 
-        if len(set(component_sizes.values())) > 1:
-            targ_comp_id = random.choice([
-                i for i in range(len(component_list))
-                if component_sizes[i] != max_size
-                if i in movable_components
-            ])
-        else:
-            targ_comp_id = random.choice([
-                i for i in range(len(component_list))
-                if i in movable_components
-            ])
+        targ_comp_id = random.choice([
+            i for i in range(len(component_list))
+            if i in movable_components
+        ])
 
         targ_comp = component_list[targ_comp_id]
 
@@ -274,6 +276,8 @@ class Spinner:
         movable_components : :class:`iterable` of :class:`int`,
         optional
             Components of supramolecule to move during simulation.
+            If `None`, then moved components are selected randomly,
+            and the largest component (host) is not moved.
 
         Returns
         -------
