@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="SpinDry",
-    version="0.0.7",
+    version="0.0.8",
     author="Andrew Tarzia",
     author_email="andrew.tarzia@gmail.com",
     description="Contains MC algorithm for generating host-guest conformers.",
