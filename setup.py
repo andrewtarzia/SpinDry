@@ -13,6 +13,7 @@ setuptools.setup(
         'matplotlib',
         'networkx',
         'numpy',
+        'stk',
     ),
     classifiers=[
         "Programming Language :: Python :: 3",
