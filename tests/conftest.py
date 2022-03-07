@@ -1,6 +1,7 @@
 import pytest
 import numpy as np
 import spindry as spd
+import stk
 
 
 @pytest.fixture(
@@ -116,13 +117,13 @@ def nb_mins():
 
 @pytest.fixture
 def final_potential():
-    return -0.0564393681661353
+    return -0.04786452927586137
 
 
 @pytest.fixture
 def final_pos_mat():
     return np.array([
-        [-0.02514959, -0.50457139, -0.20141202],
+        [-0.19613681, -0.52185641, -0.26907745],
         [ 1.31683193,  2.57903968,  0.21028248]
     ])
 
@@ -178,8 +179,8 @@ def movable_components1():
 def final_comp_pos_mat1():
     return np.array([
         [0, 0, 0],
-        [1.39723851,  0.74108939, -0.6065934],
-        [0.27007492,  1.3135034 ,  0.20077543],
+        [0., 1.5, 0.],
+        [0.59476412,  4.20474898, -1.24371808],
     ])
 
 
@@ -191,7 +192,115 @@ def movable_components2():
 @pytest.fixture
 def final_comp_pos_mat2():
     return np.array([
-        [1.39723851,  0.74108939, -0.6065934],
-        [0.27007492,  1.3135034 ,  0.20077543],
+        [1.04061245,  0.44756825, -0.78994905],
+        [-0.04983144,  1.15362244, -0.04000266],
         [0, 3.0, 0],
     ])
+
+
+
+@pytest.fixture
+def stk_spinner():
+    return spd.Spinner(
+        step_size=0.0,
+        rotation_step_size=0.0,
+        num_conformers=1,
+    )
+
+
+@pytest.fixture
+def stk_host():
+    # Building a cage from the examples on the stk docs.
+    bb1 = stk.BuildingBlock(
+        smiles='O=CC(C=O)C=O',
+        functional_groups=[stk.AldehydeFactory()],
+    )
+    bb2 = stk.BuildingBlock('NCCN', [stk.PrimaryAminoFactory()])
+
+    return stk.ConstructedMolecule(
+        topology_graph=stk.cage.FourPlusSix(
+            building_blocks=(bb1, bb2),
+        ),
+    )
+
+
+@pytest.fixture
+def stk_guest():
+    return stk.BuildingBlock('C1CCCCC1')
+
+
+@pytest.fixture
+def stk_supramolecule(stk_host, stk_guest):
+    host_guest = stk.ConstructedMolecule(
+        topology_graph=stk.host_guest.Complex(
+            host=stk.BuildingBlock.init_from_molecule(stk_host),
+            guests=[stk.host_guest.Guest(stk_guest)],
+        )
+    )
+    return spd.SupraMolecule(
+        atoms=(
+            spd.Atom(
+                id=atom.get_id(),
+                element_string=atom.__class__.__name__,
+            ) for atom in host_guest.get_atoms()
+        ),
+        bonds=(
+            spd.Bond(
+                id=i,
+                atom_ids=(
+                    bond.get_atom1().get_id(),
+                    bond.get_atom2().get_id(),
+                )
+            ) for i, bond in enumerate(host_guest.get_bonds())
+        ),
+        position_matrix=host_guest.get_position_matrix(),
+    )
+
+
+@pytest.fixture
+def stk_supramolecule_by_comp(stk_host, stk_guest):
+
+    host_molecule = spd.Molecule(
+        atoms=(
+            spd.Atom(
+                id=atom.get_id(),
+                element_string=atom.__class__.__name__,
+            ) for atom in stk_host.get_atoms()
+        ),
+        bonds=(
+            spd.Bond(
+                id=i,
+                atom_ids=(
+                    bond.get_atom1().get_id(),
+                    bond.get_atom2().get_id(),
+                )
+            ) for i, bond in enumerate(
+                stk_host.get_bonds()
+            )
+        ),
+        position_matrix=(
+            stk_host.get_position_matrix()
+        ),
+    )
+    guest_molecule = spd.Molecule(
+        atoms=(
+            spd.Atom(
+                id=atom.get_id(),
+                element_string=atom.__class__.__name__,
+            ) for atom in stk_guest.get_atoms()
+        ),
+        bonds=(
+            spd.Bond(
+                id=i,
+                atom_ids=(
+                    bond.get_atom1().get_id(),
+                    bond.get_atom2().get_id(),
+                )
+            ) for i, bond in enumerate(stk_guest.get_bonds())
+        ),
+        position_matrix=stk_guest.get_position_matrix(),
+    )
+
+    return spd.SupraMolecule.init_from_components(
+        components=(host_molecule, guest_molecule),
+    )

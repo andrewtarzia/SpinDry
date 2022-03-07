@@ -1,4 +1,7 @@
 import numpy as np
+from ..utilities import (
+    is_equivalent_stk_molecule, is_equivalent_spd_molecule
+)
 
 
 def test_opt(spinner, smolecule, final_pos_mat, final_potential):
@@ -14,12 +17,54 @@ def test_opt(spinner, smolecule, final_pos_mat, final_potential):
     )
 
 
+def test_opt_stk(
+    stk_spinner,
+    stk_host,
+    stk_guest,
+    stk_supramolecule,
+):
+    test = stk_spinner.get_final_conformer(stk_supramolecule)
+    is_equivalent_spd_molecule(test, stk_supramolecule)
+    for i, comp in enumerate(list(test.get_components())):
+        if i == 0:
+            test_host = stk_host.with_position_matrix(
+                comp.get_position_matrix()
+            )
+            is_equivalent_stk_molecule(test_host, stk_host)
+        elif i == 1:
+            test_guest = stk_guest.with_position_matrix(
+                comp.get_position_matrix()
+            )
+            is_equivalent_stk_molecule(test_guest, stk_guest)
+
+
+def test_opt_stk_components(
+    stk_spinner,
+    stk_host,
+    stk_guest,
+    stk_supramolecule,
+):
+    test = stk_spinner.get_final_conformer(stk_supramolecule)
+    is_equivalent_spd_molecule(test, stk_supramolecule)
+    for i, comp in enumerate(list(test.get_components())):
+        if i == 0:
+            test_host = stk_host.with_position_matrix(
+                comp.get_position_matrix()
+            )
+            is_equivalent_stk_molecule(test_host, stk_host)
+        elif i == 1:
+            test_guest = stk_guest.with_position_matrix(
+                comp.get_position_matrix()
+            )
+            is_equivalent_stk_molecule(test_guest, stk_guest)
+
+
 def test_opt_test_move(spinner):
     # Do not test random component.
     assert spinner._test_move(curr_pot=-1, new_pot=-2)
 
 
-def test_opt_setcomp(
+def test_opt_setcomp1(
     spinner,
     smolecule_components,
     final_comp_pos_mat1,
@@ -35,7 +80,7 @@ def test_opt_setcomp(
     ))
 
 
-def test_opt_setcomp(
+def test_opt_setcomp2(
     spinner,
     smolecule_components,
     final_comp_pos_mat2,
