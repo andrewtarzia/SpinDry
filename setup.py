@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="SpinDry",
-    version="0.0.8",
+    version="0.0.9",
     author="Andrew Tarzia",
     author_email="andrew.tarzia@gmail.com",
     description="Contains MC algorithm for generating host-guest conformers.",
@@ -13,7 +13,6 @@ setuptools.setup(
         'matplotlib',
         'networkx',
         'numpy',
-        'stk',
     ),
     classifiers=[
         "Programming Language :: Python :: 3",
