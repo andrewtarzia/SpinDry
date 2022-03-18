@@ -63,8 +63,38 @@ class SupraMolecule(Molecule):
         self._cid = cid
         self._potential = potential
 
+    def with_position_matrix(self, position_matrix):
+        """
+        Return clone SupraMolecule with new position matrix.
+
+        Parameters
+        ----------
+        position_matrix : :class:`numpy.ndarray`
+            A position matrix of the clone. The shape of the matrix
+            is ``(n, 3)``.
+
+        """
+
+        _temp_components = tuple(self.get_components())
+
+        _temp_supramolecule = SupraMolecule(
+            atoms=self._atoms,
+            bonds=self._bonds,
+            position_matrix=np.array(position_matrix),
+            cid=self._cid,
+            potential=self._potential,
+        )
+        # Overwrite redefined components.
+        _temp_supramolecule._components = _temp_components
+        return _temp_supramolecule
+
     @classmethod
-    def init_from_components(cls, components):
+    def init_from_components(
+        cls,
+        components,
+        cid=None,
+        potential=None,
+    ):
         """
         Initialize a :class:`Supramolecule` instance from components.
 
@@ -72,6 +102,12 @@ class SupraMolecule(Molecule):
         ----------
         components : :class:`iterable` of :class:`.Molecule`
             Molecular components that define the supramolecule.
+
+        cid : :class:`int`, optional
+            Conformer id of supramolecule.
+
+        potential : :class:`float`, optional
+            Potential energy of Supramolecule.
 
         """
 
@@ -114,8 +150,8 @@ class SupraMolecule(Molecule):
         supramolecule._atoms = tuple(atoms)
         supramolecule._bonds = tuple(bonds)
         supramolecule._components = tuple(components)
-        supramolecule._cid = None
-        supramolecule._potential = None
+        supramolecule._cid = cid
+        supramolecule._potential = potential
         supramolecule._position_matrix = np.array(position_matrix).T
         return supramolecule
 

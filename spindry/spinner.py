@@ -218,10 +218,8 @@ class Spinner:
         cid = 0
         nonbonded_potential = self._compute_potential(supramolecule)
 
-        yield SupraMolecule(
-            atoms=supramolecule.get_atoms(),
-            bonds=supramolecule.get_bonds(),
-            position_matrix=supramolecule.get_position_matrix(),
+        yield SupraMolecule.init_from_components(
+            components=list(supramolecule.get_components()),
             cid=cid,
             potential=nonbonded_potential,
         )
@@ -239,16 +237,14 @@ class Spinner:
                 cid += 1
                 cids_passed.append(cid)
                 nonbonded_potential = n_nonbonded_potential
-                supramolecule = SupraMolecule(
-                    atoms=supramolecule.get_atoms(),
-                    bonds=supramolecule.get_bonds(),
-                    position_matrix=(
-                        n_supramolecule.get_position_matrix()
-                    ),
+                supramolecule = SupraMolecule.init_from_components(
+                    components=list(n_supramolecule.get_components()),
                     cid=cid,
                     potential=nonbonded_potential,
                 )
-
+                supramolecule = supramolecule.with_position_matrix(
+                    n_supramolecule.get_position_matrix()
+                )
                 yield supramolecule
 
             if len(cids_passed) == self._num_conformers:
