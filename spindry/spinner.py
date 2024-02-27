@@ -1,25 +1,16 @@
-"""
-Spinner
-=======
-
-#. :class:`.Spinner`
-
-Generator of host guest conformations using nonbonded interactions.
-
-"""
-
-import numpy as np
+"""Generator of host guest conformations using nonbonded interactions."""
 
 import random
 
+import numpy as np
+
+from .potential import SpdPotential
 from .supramolecule import SupraMolecule
 from .utilities import rotation_matrix_arbitrary_axis
-from .potential import SpdPotential
 
 
 class Spinner:
-    """
-    Generate host-guest conformations by rotating guest.
+    """Generate host-guest conformations by rotating guest.
 
     A Metroplis MC algorithm is applied to perform rigid
     translations and rotations of the guest, relative to the host.
@@ -36,8 +27,7 @@ class Spinner:
         beta=2,
         random_seed=1000,
     ):
-        """
-        Initialize a :class:`Spinner` instance.
+        """Initialize a :class:`Spinner` instance.
 
         Parameters
         ----------
@@ -68,7 +58,6 @@ class Spinner:
             to 1000.
 
         """
-
         self._step_size = step_size
         self._num_conformers = num_conformers
         self._rotation_step_size = rotation_step_size
@@ -83,9 +72,7 @@ class Spinner:
             random.seed(random_seed)
 
     def _compute_potential(self, supramolecule):
-        return self._potential_function.compute_potential(
-            supramolecule
-        )
+        return self._potential_function.compute_potential(supramolecule)
 
     def _translate_atoms_along_vector(self, mol, vector):
         return mol.with_displacement(vector)
@@ -106,11 +93,10 @@ class Spinner:
         return mol
 
     def _test_move(self, curr_pot, new_pot):
-
         if new_pot < curr_pot:
             return True
         else:
-            exp_term = np.exp(-self._beta*(new_pot-curr_pot))
+            exp_term = np.exp(-self._beta * (new_pot - curr_pot))
             rand_number = random.random()
 
             if exp_term > rand_number:
@@ -119,11 +105,9 @@ class Spinner:
                 return False
 
     def _run_step(self, supramolecule, movable_components):
-
         component_list = list(supramolecule.get_components())
         component_sizes = {
-            i: mol.get_num_atoms()
-            for i, mol in enumerate(component_list)
+            i: mol.get_num_atoms() for i, mol in enumerate(component_list)
         }
         max_size = max(component_sizes.values())
 
@@ -134,7 +118,8 @@ class Spinner:
             # If there are different sizes.
             if len(set(component_sizes.values())) > 1:
                 movable_components = tuple(
-                    i for i in range(len(component_list))
+                    i
+                    for i in range(len(component_list))
                     if component_sizes[i] != max_size
                 )
             # Else capture all!
@@ -143,10 +128,9 @@ class Spinner:
                     i for i in range(len(component_list))
                 )
 
-        targ_comp_id = random.choice([
-            i for i in range(len(component_list))
-            if i in movable_components
-        ])
+        targ_comp_id = random.choice(
+            [i for i in range(len(component_list)) if i in movable_components]
+        )
 
         targ_comp = component_list[targ_comp_id]
 
@@ -193,8 +177,7 @@ class Spinner:
         movable_components=None,
         verbose=False,
     ):
-        """
-        Get conformers of supramolecule.
+        """Get conformers of supramolecule.
 
         Parameters
         ----------
@@ -208,13 +191,12 @@ class Spinner:
         verbose : :class:`bool`
             `True` to print some extra information.
 
-        Yields
+        Yields:
         ------
         conformer : :class:`.SupraMolecule`
             The host-guest supramolecule.
 
         """
-
         cid = 0
         nonbonded_potential = self._compute_potential(supramolecule)
 
@@ -230,8 +212,7 @@ class Spinner:
                 movable_components=movable_components,
             )
             passed = self._test_move(
-                curr_pot=nonbonded_potential,
-                new_pot=n_nonbonded_potential
+                curr_pot=nonbonded_potential, new_pot=n_nonbonded_potential
             )
             if passed:
                 cid += 1
@@ -252,8 +233,7 @@ class Spinner:
 
         if verbose:
             print(
-                f'{len(cids_passed)} conformers generated in {step} '
-                'steps.'
+                f"{len(cids_passed)} conformers generated in {step} " "steps."
             )
 
     def get_final_conformer(
@@ -261,8 +241,7 @@ class Spinner:
         supramolecule,
         movable_components=None,
     ):
-        """
-        Get final conformer of supramolecule.
+        """Get final conformer of supramolecule.
 
         Parameters
         ----------
@@ -275,13 +254,12 @@ class Spinner:
             If `None`, then moved components are selected randomly,
             and the largest component (host) is not moved.
 
-        Returns
+        Returns:
         -------
         conformer : :class:`.SupraMolecule`
             The host-guest supramolecule.
 
         """
-
         for conformer in self.get_conformers(
             supramolecule=supramolecule,
             movable_components=movable_components,

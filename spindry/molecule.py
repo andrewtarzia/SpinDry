@@ -1,25 +1,13 @@
-"""
-Molecule
-========
-
-#. :class:`.Molecule`
-
-Molecule class for optimisation.
-
-"""
+"""Molecule class for optimisation."""
 
 import numpy as np
 
 
 class Molecule:
-    """
-    Representation of a molecule containing atoms and positions.
-
-    """
+    """Representation of a molecule containing atoms and positions."""
 
     def __init__(self, atoms, bonds, position_matrix):
-        """
-        Initialize a :class:`Molecule` instance.
+        """Initialize a :class:`Molecule` instance.
 
         Parameters
         ----------
@@ -34,7 +22,6 @@ class Molecule:
             the :class:`.Molecule`.
 
         """
-
         self._atoms = tuple(atoms)
         self._bonds = tuple(bonds)
         self._position_matrix = np.array(
@@ -43,22 +30,19 @@ class Molecule:
         )
 
     def get_position_matrix(self):
-        """
-        Return a matrix holding the atomic positions.
+        """Return a matrix holding the atomic positions.
 
-        Returns
+        Returns:
         -------
         :class:`numpy.ndarray`
             The array has the shape ``(n, 3)``. Each row holds the
             x, y and z coordinates of an atom.
 
         """
-
         return np.array(self._position_matrix.T)
 
     def with_displacement(self, displacement):
-        """
-        Return a displaced clone Molecule.
+        """Return a displaced clone Molecule.
 
         Parameters
         ----------
@@ -66,10 +50,7 @@ class Molecule:
             The displacement vector to be applied.
 
         """
-
-        new_position_matrix = (
-            self._position_matrix.T + displacement
-        )
+        new_position_matrix = self._position_matrix.T + displacement
         return Molecule(
             atoms=self._atoms,
             bonds=self._bonds,
@@ -77,8 +58,7 @@ class Molecule:
         )
 
     def with_position_matrix(self, position_matrix):
-        """
-        Return clone Molecule with new position matrix.
+        """Return clone Molecule with new position matrix.
 
         Parameters
         ----------
@@ -87,7 +67,6 @@ class Molecule:
             is ``(n, 3)``.
 
         """
-
         return Molecule(
             atoms=self._atoms,
             bonds=self._bonds,
@@ -95,74 +74,58 @@ class Molecule:
         )
 
     def _write_xyz_content(self):
-        """
-        Write basic `.xyz` file content of Molecule.
-
-        """
+        """Write basic `.xyz` file content of Molecule."""
         coords = self.get_position_matrix()
         content = [0]
         for i, atom in enumerate(self.get_atoms(), 1):
             x, y, z = (i for i in coords[atom.get_id()])
-            content.append(
-                f'{atom.get_element_string()} {x:f} {y:f} {z:f}\n'
-            )
+            content.append(f"{atom.get_element_string()} {x:f} {y:f} {z:f}\n")
         # Set first line to the atom_count.
-        content[0] = f'{i}\n\n'
+        content[0] = f"{i}\n\n"
 
         return content
 
     def write_xyz_file(self, path):
-        """
-        Write basic `.xyz` file of Molecule to `path`.
+        """Write basic `.xyz` file of Molecule to `path`.
 
         Connectivity is not maintained in this file type!
 
         """
-
         content = self._write_xyz_content()
 
-        with open(path, 'w') as f:
-            f.write(''.join(content))
+        with open(path, "w") as f:
+            f.write("".join(content))
 
     def get_atoms(self):
-        """
-        Yield the atoms in the molecule, ordered as input.
+        """Yield the atoms in the molecule, ordered as input.
 
-        Yields
+        Yields:
         ------
         :class:`.Atom`
             An atom in the molecule.
 
         """
-
         for atom in self._atoms:
             yield atom
 
     def get_bonds(self):
-        """
-        Yield the bonds in the molecule, ordered as input.
+        """Yield the bonds in the molecule, ordered as input.
 
-        Yields
+        Yields:
         ------
         :class:`.Bond`
             A bond in the molecule.
 
         """
-
         for bond in self._bonds:
             yield bond
 
     def get_num_atoms(self):
-        """
-        Return the number of atoms in the molecule.
-
-        """
-
+        """Return the number of atoms in the molecule."""
         return len(self._atoms)
 
     def get_centroid(self, atom_ids=None):
-        """
-        Return the centroid.
+        """Return the centroid.
 
         Parameters
         ----------
@@ -172,31 +135,29 @@ class Molecule:
             atom is to be used, or ``None`` if all atoms are to be
             used.
 
-        Returns
+        Returns:
         -------
         :class:`numpy.ndarray`
             The centroid of atoms specified by `atom_ids`.
 
-        Raises
+        Raises:
         ------
         :class:`ValueError`
             If `atom_ids` has a length of ``0``.
 
         """
-
         if atom_ids is None:
             atom_ids = range(len(self._atoms))
         elif isinstance(atom_ids, int):
-            atom_ids = (atom_ids, )
+            atom_ids = (atom_ids,)
         elif not isinstance(atom_ids, (list, tuple)):
             atom_ids = list(atom_ids)
 
         if len(atom_ids) == 0:
-            raise ValueError('atom_ids was of length 0.')
+            raise ValueError("atom_ids was of length 0.")
 
         return np.divide(
-            self._position_matrix[:, atom_ids].sum(axis=1),
-            len(atom_ids)
+            self._position_matrix[:, atom_ids].sum(axis=1), len(atom_ids)
         )
 
     def __str__(self):
@@ -204,6 +165,6 @@ class Molecule:
 
     def __repr__(self):
         return (
-            f'<{self.__class__.__name__}({len(self._atoms)} atoms) '
-            f'at {id(self)}>'
+            f"<{self.__class__.__name__}({len(self._atoms)} atoms) "
+            f"at {id(self)}>"
         )

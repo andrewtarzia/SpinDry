@@ -1,26 +1,15 @@
-"""
-SupraMolecule
-=============
-
-#. :class:`.SupraMolecule`
-
-SupraMolecule class for optimisation.
-
-"""
+"""SupraMolecule class for optimisation."""
 
 import networkx as nx
 import numpy as np
 
-from .molecule import Molecule
 from .atom import Atom
 from .bond import Bond
+from .molecule import Molecule
 
 
 class SupraMolecule(Molecule):
-    """
-    Representation of a supramolecule containing atoms and positions.
-
-    """
+    """Representation of a supramolecule containing atoms and positions."""
 
     def __init__(
         self,
@@ -30,8 +19,7 @@ class SupraMolecule(Molecule):
         cid=None,
         potential=None,
     ):
-        """
-        Initialize a :class:`Supramolecule` instance.
+        """Initialize a :class:`Supramolecule` instance.
 
         Parameters
         ----------
@@ -52,7 +40,6 @@ class SupraMolecule(Molecule):
             Potential energy of Supramolecule.
 
         """
-
         self._atoms = tuple(atoms)
         self._bonds = tuple(bonds)
         self._position_matrix = np.array(
@@ -64,8 +51,7 @@ class SupraMolecule(Molecule):
         self._potential = potential
 
     def with_position_matrix(self, position_matrix):
-        """
-        Return clone SupraMolecule with new position matrix.
+        """Return clone SupraMolecule with new position matrix.
 
         Parameters
         ----------
@@ -74,7 +60,6 @@ class SupraMolecule(Molecule):
             is ``(n, 3)``.
 
         """
-
         _temp_components = tuple(self.get_components())
 
         _temp_supramolecule = SupraMolecule(
@@ -95,8 +80,7 @@ class SupraMolecule(Molecule):
         cid=None,
         potential=None,
     ):
-        """
-        Initialize a :class:`Supramolecule` instance from components.
+        """Initialize a :class:`Supramolecule` instance from components.
 
         Parameters
         ----------
@@ -110,7 +94,6 @@ class SupraMolecule(Molecule):
             Potential energy of Supramolecule.
 
         """
-
         atoms = []
         bonds = []
         position_matrix = []
@@ -122,27 +105,31 @@ class SupraMolecule(Molecule):
                 if len(atom_id_map) == 0:
                     atom_id_map[a.get_id()] = 0
                 else:
-                    atom_id_map[a.get_id()] = max(
-                        [i for i in atom_id_map.values()]
-                    )+1
-                atoms.append(Atom(
-                    id=atom_id_map[a.get_id()],
-                    element_string=a.get_element_string(),
-                ))
+                    atom_id_map[a.get_id()] = (
+                        max([i for i in atom_id_map.values()]) + 1
+                    )
+                atoms.append(
+                    Atom(
+                        id=atom_id_map[a.get_id()],
+                        element_string=a.get_element_string(),
+                    )
+                )
             for b in comp.get_bonds():
                 if len(bond_id_map) == 0:
                     bond_id_map[b.get_id()] = 0
                 else:
-                    bond_id_map[b.get_id()] = max(
-                        [i for i in bond_id_map.values()]
-                    )+1
-                bonds.append(Bond(
-                    id=bond_id_map[b.get_id()],
-                    atom_ids=(
-                        atom_id_map[b.get_atom1_id()],
-                        atom_id_map[b.get_atom2_id()],
+                    bond_id_map[b.get_id()] = (
+                        max([i for i in bond_id_map.values()]) + 1
                     )
-                ))
+                bonds.append(
+                    Bond(
+                        id=bond_id_map[b.get_id()],
+                        atom_ids=(
+                            atom_id_map[b.get_atom1_id()],
+                            atom_id_map[b.get_atom2_id()],
+                        ),
+                    )
+                )
             for pos in comp.get_position_matrix():
                 position_matrix.append(pos)
 
@@ -156,11 +143,7 @@ class SupraMolecule(Molecule):
         return supramolecule
 
     def _define_components(self):
-        """
-        Define disconnected component molecules as :class:`.Molecule`s.
-
-        """
-
+        """Define disconnected component molecules as :class:`.Molecule`s."""
         # Produce a graph from the molecule that does not include edges
         # where the bonds to be optimized are.
         mol_graph = nx.Graph()
@@ -176,44 +159,31 @@ class SupraMolecule(Molecule):
         comps = []
         for c in nx.connected_components(mol_graph):
             c_ids = sorted(c)
-            in_atoms = [
-                i for i in self._atoms
-                if i.get_id() in c
-            ]
+            in_atoms = [i for i in self._atoms if i.get_id() in c]
             in_bonds = [
-                i for i in self._bonds
+                i
+                for i in self._bonds
                 if i.get_atom1_id() in c and i.get_atom2_id() in c
             ]
             new_pos_matrix = self._position_matrix[:, list(c_ids)].T
-            comps.append(
-                Molecule(in_atoms, in_bonds, new_pos_matrix)
-            )
+            comps.append(Molecule(in_atoms, in_bonds, new_pos_matrix))
 
         self._components = tuple(comps)
 
     def _write_xyz_content(self):
-        """
-        Write basic `.xyz` file content of Molecule.
-
-        """
+        """Write basic `.xyz` file content of Molecule."""
         coords = self.get_position_matrix()
         content = [0]
         for i, atom in enumerate(self.get_atoms(), 1):
             x, y, z = (i for i in coords[atom.get_id()])
-            content.append(
-                f'{atom.get_element_string()} {x:f} {y:f} {z:f}\n'
-            )
+            content.append(f"{atom.get_element_string()} {x:f} {y:f} {z:f}\n")
         # Set first line to the atom_count.
-        content[0] = f'{i}\ncid:{self._cid}, pot: {self._potential}\n'
+        content[0] = f"{i}\ncid:{self._cid}, pot: {self._potential}\n"
 
         return content
 
     def get_components(self):
-        """
-        Yields each molecular component.
-
-        """
-
+        """Yields each molecular component."""
         for i in self._components:
             yield i
 
@@ -227,9 +197,9 @@ class SupraMolecule(Molecule):
         return repr(self)
 
     def __repr__(self):
-        comps = ', '.join([str(i) for i in self.get_components()])
+        comps = ", ".join([str(i) for i in self.get_components()])
         return (
-            f'{self.__class__.__name__}('
-            f'{len(list(self.get_components()))} components, '
-            f'{comps})'
+            f"{self.__class__.__name__}("
+            f"{len(list(self.get_components()))} components, "
+            f"{comps})"
         )

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import numpy as np
 import pytest
 
@@ -11,7 +13,7 @@ import spindry as spd
         (spd.Atom(id=2, element_string="C"), 2, "C", 1.60775485914852),
     )
 )
-def atom_info(request: pytest.FixtureRequest):
+def atom_info(request: pytest.FixtureRequest) -> tuple:
     return request.param
 
 
@@ -23,52 +25,55 @@ def atom_info(request: pytest.FixtureRequest):
         (spd.Bond(id=3, atom_ids=(0, 9)), 3, 0, 9),
     )
 )
-def bond_info(request: pytest.FixtureRequest):
+def bond_info(request: pytest.FixtureRequest) -> tuple:
     return request.param
 
 
 @pytest.fixture()
-def atoms():
+def atoms() -> list:
     return [spd.Atom(0, "C"), spd.Atom(1, "C")]
 
 
 @pytest.fixture()
-def position_matrix():
+def position_matrix() -> np.ndarray:
     return np.array([[0, 0, 0], [0, 1.5, 0]])
 
 
 @pytest.fixture()
-def position_matrix2():
+def position_matrix2() -> np.ndarray:
     return np.array([[0, 0, 0], [0, 3, 0]])
 
 
 @pytest.fixture()
-def displacement():
+def displacement() -> np.ndarray:
     return np.array([0, 1, 0])
 
 
 @pytest.fixture()
-def displaced_position_matrix():
+def displaced_position_matrix() -> np.ndarray:
     return np.array([[0, 1, 0], [0, 2.5, 0]])
 
 
 @pytest.fixture()
-def centroid():
+def centroid() -> np.ndarray:
     return np.array([0, 0.75, 0])
 
 
 @pytest.fixture()
-def num_atoms():
+def num_atoms() -> int:
     return 2
 
 
 @pytest.fixture()
-def molecule(atoms, position_matrix):
+def molecule(atoms: list, position_matrix: np.ndarray) -> spd.Molecule:
     return spd.Molecule(atoms=atoms, bonds=[], position_matrix=position_matrix)
 
 
 @pytest.fixture()
-def components(atoms, position_matrix):
+def components(
+    atoms: list,
+    position_matrix: np.ndarray,
+) -> tuple[spd.Molecule]:
     return (
         spd.Molecule(
             atoms=(atoms[0],), bonds=[], position_matrix=position_matrix[0]
@@ -80,7 +85,7 @@ def components(atoms, position_matrix):
 
 
 @pytest.fixture()
-def smolecule(atoms, position_matrix):
+def smolecule(atoms: list, position_matrix: np.ndarray) -> spd.SupraMolecule:
     return spd.SupraMolecule(
         atoms=atoms,
         bonds=[],
@@ -89,12 +94,12 @@ def smolecule(atoms, position_matrix):
 
 
 @pytest.fixture()
-def distances():
+def distances() -> np.ndarray:
     return np.array([1, 1.2, 1.4, 1.6, 1.8, 2.0, 4])
 
 
 @pytest.fixture()
-def nonbond_potentials():
+def nonbond_potentials() -> list[float]:
     return [
         29.650582241279984,
         0.0,
@@ -107,17 +112,17 @@ def nonbond_potentials():
 
 
 @pytest.fixture()
-def nb_mins():
+def nb_mins() -> list[int]:
     return [1, 2, 4, 3]
 
 
 @pytest.fixture()
-def final_potential():
+def final_potential() -> float:
     return -0.04786452927586137
 
 
 @pytest.fixture()
-def final_pos_mat():
+def final_pos_mat() -> np.ndarray:
     return np.array(
         [
             [-0.19613681, -0.52185641, -0.26907745],
@@ -127,7 +132,7 @@ def final_pos_mat():
 
 
 @pytest.fixture()
-def spinner():
+def spinner() -> spd.Spinner:
     return spd.Spinner(
         step_size=0.5,
         rotation_step_size=5,
@@ -136,12 +141,12 @@ def spinner():
 
 
 @pytest.fixture()
-def spdpotential():
+def spdpotential() -> spd.SpdPotential:
     return spd.SpdPotential()
 
 
 @pytest.fixture()
-def radii_combinations():
+def radii_combinations() -> list[tuple]:
     return [
         (1.24235230881914, 1.24235230881914, 1.24235230881914),
         (1.24235230881914, 2.056812828, 1.64958256840957),
@@ -151,12 +156,14 @@ def radii_combinations():
 
 
 @pytest.fixture()
-def three_position_matrix():
+def three_position_matrix() -> np.ndarray:
     return np.array([[0, 0, 0], [0, 1.5, 0], [0, 3.0, 0]])
 
 
 @pytest.fixture()
-def smolecule_components(three_position_matrix):
+def smolecule_components(
+    three_position_matrix: np.ndarray,
+) -> spd.SupraMolecule:
     return spd.SupraMolecule(
         atoms=[spd.Atom(0, "C"), spd.Atom(1, "C"), spd.Atom(2, "C")],
         bonds=[spd.Bond(0, (0, 1))],
@@ -165,12 +172,12 @@ def smolecule_components(three_position_matrix):
 
 
 @pytest.fixture()
-def movable_components1():
+def movable_components1() -> tuple:
     return (1,)
 
 
 @pytest.fixture()
-def final_comp_pos_mat1():
+def final_comp_pos_mat1() -> np.ndarray:
     return np.array(
         [
             [0, 0, 0],
@@ -181,12 +188,12 @@ def final_comp_pos_mat1():
 
 
 @pytest.fixture()
-def movable_components2():
+def movable_components2() -> tuple:
     return (0,)
 
 
 @pytest.fixture()
-def final_comp_pos_mat2():
+def final_comp_pos_mat2() -> np.ndarray:
     return np.array(
         [
             [1.04061245, 0.44756825, -0.78994905],
@@ -197,7 +204,7 @@ def final_comp_pos_mat2():
 
 
 @pytest.fixture()
-def spd_spinner():
+def spd_spinner() -> spd.Spinner:
     return spd.Spinner(
         step_size=0.0,
         rotation_step_size=0.0,
@@ -206,7 +213,7 @@ def spd_spinner():
 
 
 @pytest.fixture()
-def spd_host():
+def spd_host() -> spd.Molecule:
     return spd.Molecule(
         atoms=[
             spd.Atom(0, "C"),
@@ -462,7 +469,7 @@ def spd_host():
 
 
 @pytest.fixture()
-def spd_guest():
+def spd_guest() -> spd.Molecule:
     return spd.Molecule(
         atoms=[
             spd.Atom(0, "C"),
@@ -530,7 +537,7 @@ def spd_guest():
 
 
 @pytest.fixture()
-def spd_supramolecule():
+def spd_supramolecule() -> spd.SupraMolecule:
     return spd.SupraMolecule(
         atoms=[
             spd.Atom(0, "C"),
@@ -840,8 +847,10 @@ def spd_supramolecule():
 
 
 @pytest.fixture()
-def spd_supramolecule_by_comp(spd_host, spd_guest):
-
+def spd_supramolecule_by_comp(
+    spd_host: spd.Molecule,
+    spd_guest: spd.Molecule,
+) -> spd.SupraMolecule:
     return spd.SupraMolecule.init_from_components(
         components=(spd_host, spd_guest),
     )

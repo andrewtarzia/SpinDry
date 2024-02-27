@@ -1,26 +1,35 @@
 import numpy as np
-from ..utilities import is_equivalent_spd_molecule
+
+import spindry as spd
+from tests.utilities import is_equivalent_spd_molecule
 
 
-def test_opt(spinner, smolecule, final_pos_mat, final_potential):
+def test_opt(
+    spinner: spd.Spinner,
+    smolecule: spd.Molecule,
+    final_pos_mat: np.ndarray,
+    final_potential: float,
+) -> None:
     test = spinner.get_final_conformer(smolecule)
     print(test.get_position_matrix())
-    assert np.all(np.allclose(
-        final_pos_mat,
-        test.get_position_matrix(),
-    ))
+    assert np.all(
+        np.allclose(
+            final_pos_mat,
+            test.get_position_matrix(),
+        )
+    )
     assert np.isclose(
         spinner._compute_potential(test),
-        final_potential
+        final_potential,
     )
 
 
 def test_opt_spd(
-    spd_spinner,
-    spd_host,
-    spd_guest,
-    spd_supramolecule,
-):
+    spd_spinner: spd.Spinner,
+    spd_host: spd.Molecule,
+    spd_guest: spd.Molecule,
+    spd_supramolecule: spd.SupraMolecule,
+) -> None:
     test = spd_spinner.get_final_conformer(spd_supramolecule)
     is_equivalent_spd_molecule(test, spd_supramolecule)
     for i, comp in enumerate(list(test.get_components())):
@@ -37,11 +46,11 @@ def test_opt_spd(
 
 
 def test_opt_spd_components(
-    spd_spinner,
-    spd_host,
-    spd_guest,
-    spd_supramolecule,
-):
+    spd_spinner: spd.Spinner,
+    spd_host: spd.Molecule,
+    spd_guest: spd.Molecule,
+    spd_supramolecule: spd.SupraMolecule,
+) -> None:
     test = spd_spinner.get_final_conformer(spd_supramolecule)
     is_equivalent_spd_molecule(test, spd_supramolecule)
     for i, comp in enumerate(list(test.get_components())):
@@ -57,38 +66,44 @@ def test_opt_spd_components(
             is_equivalent_spd_molecule(test_guest, spd_guest)
 
 
-def test_opt_test_move(spinner):
+def test_opt_test_move(spinner: spd.Spinner) -> None:
     # Do not test random component.
-    assert spinner._test_move(curr_pot=-1, new_pot=-2)
+    assert spinner._test_move(curr_pot=-1, new_pot=-2)  # noqa: SLF001
 
 
 def test_opt_setcomp1(
-    spinner,
-    smolecule_components,
-    final_comp_pos_mat1,
-    movable_components1,
-):
+    spinner: spd.Spinner,
+    smolecule_components: spd.SupraMolecule,
+    final_comp_pos_mat1: np.ndarray,
+    movable_components1: tuple,
+) -> None:
     test = spinner.get_final_conformer(
-        smolecule_components, movable_components1,
+        smolecule_components,
+        movable_components1,
     )
     print(test.get_position_matrix())
-    assert np.all(np.allclose(
-        final_comp_pos_mat1,
-        test.get_position_matrix(),
-    ))
+    assert np.all(
+        np.allclose(
+            final_comp_pos_mat1,
+            test.get_position_matrix(),
+        )
+    )
 
 
 def test_opt_setcomp2(
-    spinner,
-    smolecule_components,
-    final_comp_pos_mat2,
-    movable_components2,
-):
+    spinner: spd.Spinner,
+    smolecule_components: spd.SupraMolecule,
+    final_comp_pos_mat2: np.ndarray,
+    movable_components2: tuple,
+) -> None:
     test = spinner.get_final_conformer(
-        smolecule_components, movable_components2,
+        smolecule_components,
+        movable_components2,
     )
     print(test.get_position_matrix())
-    assert np.all(np.allclose(
-        final_comp_pos_mat2,
-        test.get_position_matrix(),
-    ))
+    assert np.all(
+        np.allclose(
+            final_comp_pos_mat2,
+            test.get_position_matrix(),
+        )
+    )

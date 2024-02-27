@@ -1,22 +1,21 @@
-import stk
+import stk  # noqa: D100, INP001
+
 import spindry as spd
 
 # Building a cage from the examples on the stk docs.
 bb1 = stk.BuildingBlock(
-    smiles='O=CC(C=O)C=O',
+    smiles="O=CC(C=O)C=O",
     functional_groups=[stk.AldehydeFactory()],
 )
-bb2 = stk.BuildingBlock('NCCN', [stk.PrimaryAminoFactory()])
+bb2 = stk.BuildingBlock("NCCN", [stk.PrimaryAminoFactory()])
 
 cage = stk.ConstructedMolecule(
     topology_graph=stk.cage.FourPlusSix(
         building_blocks=(bb1, bb2),
     ),
 )
-cage.write('poc.mol')
-stk_guests = (
-    stk.BuildingBlock('CN1C=NC2=C1C(=O)N(C(=O)N2C)C'),
-)
+cage.write("poc.mol")
+stk_guests = (stk.BuildingBlock("CN1C=NC2=C1C(=O)N(C(=O)N2C)C"),)
 
 host_guest = stk.ConstructedMolecule(
     topology_graph=stk.host_guest.Complex(
@@ -24,14 +23,15 @@ host_guest = stk.ConstructedMolecule(
         guests=[stk.host_guest.Guest(i) for i in stk_guests],
     )
 )
-host_guest.write('host_guest.mol')
+host_guest.write("host_guest.mol")
 
 supramolecule = spd.SupraMolecule(
     atoms=(
         spd.Atom(
             id=atom.get_id(),
             element_string=atom.__class__.__name__,
-        ) for atom in host_guest.get_atoms()
+        )
+        for atom in host_guest.get_atoms()
     ),
     bonds=(
         spd.Bond(
@@ -39,12 +39,13 @@ supramolecule = spd.SupraMolecule(
             atom_ids=(
                 bond.get_atom1().get_id(),
                 bond.get_atom2().get_id(),
-            )
-        ) for i, bond in enumerate(host_guest.get_bonds())
+            ),
+        )
+        for i, bond in enumerate(host_guest.get_bonds())
     ),
     position_matrix=host_guest.get_position_matrix(),
 )
-print(supramolecule)
+print(supramolecule)  # noqa: T201
 
 cg = spd.Spinner(
     step_size=0.5,
@@ -53,14 +54,14 @@ cg = spd.Spinner(
 )
 
 for conformer in cg.get_conformers(supramolecule):
-    print(conformer)
-    print(conformer.get_cid(), conformer.get_potential())
+    print(conformer)  # noqa: T201
+    print(conformer.get_cid(), conformer.get_potential())  # noqa: T201
     conformer.write_xyz_file(
-        f'min_example_output/conf_{conformer.get_cid()}.xyz'
+        f"min_example_output/conf_{conformer.get_cid()}.xyz"
     )
 
 # Write optimised structure out.
 opt_host_guest = host_guest.with_position_matrix(
     conformer.get_position_matrix()
 )
-opt_host_guest.write('host_guest_out.mol')
+opt_host_guest.write("host_guest_out.mol")

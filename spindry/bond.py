@@ -1,23 +1,11 @@
-"""
-Bond
-====
-
-#. :class:`.Bond`
-
-Bond class.
-
-"""
+"""Bond class."""
 
 
 class Bond:
-    """
-    Bond between two atoms.
-
-    """
+    """Bond between two atoms."""
 
     def __init__(self, id, atom_ids):
-        """
-        Initialize a :class:`Bond` instance.
+        """Initialize a :class:`Bond` instance.
 
         Parameters
         ----------
@@ -29,34 +17,24 @@ class Bond:
             the smaller number and the IDs cannot be the same.
 
         """
-
         self._id = id
         if len(set(atom_ids)) == 0:
-            raise ValueError('Two distinct atom ids are required.')
+            raise ValueError("Two distinct atom ids are required.")
         self._atom1_id, self._atom2_id = sorted(atom_ids)
 
     def get_id(self):
-        """
-        Get bond ID.
-
-        """
-
+        """Get bond ID."""
         return self._id
 
     def get_atom1_id(self):
-        """
-        Get ID of atom 1 in bond.
-
-        """
-
+        """Get ID of atom 1 in bond."""
         return self._atom1_id
 
     def get_atom2_id(self):
+        """Get ID of atom 2 in bond.
+
+        #
         """
-        Get ID of atom 2 in bond.
-
-        #"""
-
         return self._atom2_id
 
     def __str__(self):
@@ -64,7 +42,7 @@ class Bond:
 
     def __repr__(self):
         return (
-            f'{self.__class__.__name__}(id={self.get_id()}, '
-            f'atom1_id={self.get_atom1_id()}, '
-            f'atom2_id={self.get_atom2_id()})'
+            f"{self.__class__.__name__}(id={self.get_id()}, "
+            f"atom1_id={self.get_atom1_id()}, "
+            f"atom2_id={self.get_atom2_id()})"
         )
