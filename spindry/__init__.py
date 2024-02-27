@@ -1,8 +1,10 @@
-from .spinner import *  # noqa
-from .molecule import *  # noqa
-from .supramolecule import *  # noqa
-from .atom import *  # noqa
-from .bond import *  # noqa
-from .utilities import *  # noqa
-from .radii import *  # noqa
-from .potential import *  # noqa
+"""SpinDry package."""
+
+from .atom import *  # noqa: F403
+from .bond import *  # noqa: F403
+from .molecule import *  # noqa: F403
+from .potential import *  # noqa: F403
+from .radii import *  # noqa: F403
+from .spinner import *  # noqa: F403
+from .supramolecule import *  # noqa: F403
+from .utilities import *  # noqa: F403
