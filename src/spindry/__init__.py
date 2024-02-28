@@ -1,14 +1,25 @@
 """SpinDry package."""
 
-from spindry.potential import SpdPotential
+from mchammer import Atom, Bond, Molecule
+
+from spindry.potential import SpdPotential, VaryingEpsilonPotential
 from spindry.spinner import Spinner
 from spindry.supramolecule import SupraMolecule
-from spindry.utilities import get_atom_distance, rotation_matrix_arbitrary_axis
+from spindry.utilities import (
+    calculate_centroid_distance,
+    calculate_min_atom_distance,
+    get_atom_distance,
+)
 
 __all__ = [
     "SpdPotential",
+    "VaryingEpsilonPotential",
     "SupraMolecule",
     "Spinner",
-    "rotation_matrix_arbitrary_axis",
     "get_atom_distance",
+    "calculate_min_atom_distance",
+    "calculate_centroid_distance",
+    "Atom",
+    "Bond",
+    "Molecule",
 ]
