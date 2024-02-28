@@ -6,15 +6,19 @@ SpinDry
 A Monte Carlo-based host-guest conformer generator using cheap and unphysical
 potentials.
 
-Please contact me with any questions (<andrew.tarzia@gmail.com>) or submit an
-issue!
+Please submit an issue with any questions or bugs!
+
+``SpinDry`` uses the Monte-Carlo/molecule interface provided by my other code
+``MCHammer`` (https://github.com/andrewtarzia/MCHammer)
 
 Installation
 ------------
 
 Install using pip:
 
-    pip install SpinDry
+.. code-block:: bash
+
+  pip install stk
 
 Algorithm
 ---------
