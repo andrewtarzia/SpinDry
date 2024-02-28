@@ -76,13 +76,11 @@ class Spinner:
             self._potential_function = potential_function
         self._beta = beta
         if random_seed is None:
-            random.seed()
-            np.random.seed()  # noqa: NPY002
+            self._generator = np.random.default_rng()
         else:
-            random.seed(random_seed)
-            np.random.seed(random_seed)  # noqa: NPY002
+            self._generator = np.random.default_rng(random_seed)
 
-    def _compute_potential(self, supramolecule: SupraMolecule) -> float:
+    def compute_potential(self, supramolecule: SupraMolecule) -> float:
         return self._potential_function.compute_potential(supramolecule)
 
     def _translate_atoms_along_vector(
@@ -149,31 +147,31 @@ class Spinner:
                     i for i in range(len(component_list))
                 )
 
-        targ_comp_id = random.choice(  # noqa: S311
+        targ_comp_id = self._generator.choice(
             [i for i in range(len(component_list)) if i in movable_components]
         )
 
         targ_comp = component_list[targ_comp_id]
 
         # Random number from -1 to 1 for multiplying translation.
-        rand = (random.random() - 0.5) * 2  # noqa: S311
+        rand = (self._generator.random() - 0.5) * 2
 
         # Random translation direction.
-        rand_vector = np.random.rand(3)  # noqa: NPY002
+        rand_vector = self._generator.random(3)
         rand_vector = rand_vector / np.linalg.norm(rand_vector)
 
         # Perform translation.
         translation_vector = rand_vector * self._step_size * rand
-        targ_comp = self._translate_atoms_along_vector(
+        targ_comp = mch.translate_molecule_along_vector(
             mol=targ_comp,
             vector=translation_vector,
         )
 
         # Define a random rotation of the guest.
         # Random number from -1 to 1 for multiplying rotation.
-        rand = (random.random() - 0.5) * 2  # noqa: S311
+        rand = (self._generator.random() - 0.5) * 2
         rotation_angle = self._rotation_step_size * rand
-        rand_axis = np.random.rand(3)  # noqa: NPY002
+        rand_axis = self._generator.random(3)
         rand_axis = rand_axis / np.linalg.norm(rand_vector)
 
         # Perform rotation.
@@ -233,8 +231,8 @@ class Spinner:
                 supramolecule=supramolecule,
                 movable_components=movable_components,
             )
-            passed = self._test_move(
-                curr_pot=nonbonded_potential, new_pot=n_nonbonded_potential
+                new_pot=n_nonbonded_potential,
+                generator=self._generator,
             )
             if passed:
                 cid += 1
