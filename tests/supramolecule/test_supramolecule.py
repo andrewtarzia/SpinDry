@@ -1,5 +1,5 @@
 import numpy as np
-import spd
+import spindry as spd
 
 
 def test_smolecule_define_components(

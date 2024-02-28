@@ -1,9 +1,9 @@
 import itertools as it
 
-import spindry as spd
+import mchammer as mch
 
 
-def is_equivalent_spd_atom(atom1: spd.Atom, atom2: spd.Atom) -> None:
+def is_equivalent_spd_atom(atom1: mch.Atom, atom2: mch.Atom) -> None:
     """Test if atoms are equivalent."""
     assert atom1.get_id() == atom2.get_id()
     assert atom1.get_element_string() == atom2.get_element_string()
@@ -11,7 +11,7 @@ def is_equivalent_spd_atom(atom1: spd.Atom, atom2: spd.Atom) -> None:
     assert atom1.__class__ is atom2.__class__
 
 
-def is_equivalent_spd_bond(bond1: spd.Bond, bond2: spd.Bond) -> None:
+def is_equivalent_spd_bond(bond1: mch.Bond, bond2: mch.Bond) -> None:
     """Test if bonds are equivalent."""
     assert bond1.__class__ is bond2.__class__
     assert bond1.get_id() == bond2.get_id()
@@ -20,8 +20,8 @@ def is_equivalent_spd_bond(bond1: spd.Bond, bond2: spd.Bond) -> None:
 
 
 def is_equivalent_spd_molecule(
-    molecule1: spd.Molecule,
-    molecule2: spd.Molecule,
+    molecule1: mch.Molecule,
+    molecule2: mch.Molecule,
 ) -> None:
     """Test if molecules are equivalent."""
     print(molecule1, molecule2)

@@ -27,15 +27,3 @@ def test_nonbond_potential(
             sigmas=np.array(_sigma),
         )
         assert np.argmin(test**2) == nb_mins[i]
-
-
-def test_combinations(
-    spdpotential: spd.SpdPotential,
-    radii_combinations: list[tuple],
-) -> None:
-    for combo in radii_combinations:
-        test = spdpotential._mixing_function(  # noqa: SLF001
-            combo[0], combo[1]
-        )
-
-        assert test == combo[2]

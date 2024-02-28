@@ -20,7 +20,7 @@ check:
   ( set -x; ruff format --check . )
 
   echo
-  ( set -x; mypy spindry )
+  ( set -x; mypy src )
 
   echo
   ( set -x; pytest --cov=spindry --cov-report term-missing )

@@ -1,6 +1,6 @@
-import stk  # noqa: D100, INP001
-
+import mchammer as mch  # noqa: INP001, D100
 import spindry as spd
+import stk
 
 # Building a cage from the examples on the stk docs.
 bb1 = stk.BuildingBlock(
@@ -34,14 +34,14 @@ host_guest.write("host_multi_guest.mol")
 
 supramolecule = spd.SupraMolecule(
     atoms=(
-        spd.Atom(
+        mch.Atom(
             id=atom.get_id(),
             element_string=atom.__class__.__name__,
         )
         for atom in host_guest.get_atoms()
     ),
     bonds=(
-        spd.Bond(
+        mch.Bond(
             id=i,
             atom_ids=(
                 bond.get_atom1().get_id(),

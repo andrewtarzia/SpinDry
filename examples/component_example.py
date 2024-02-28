@@ -1,6 +1,6 @@
-import stk  # noqa: D100, INP001
-
+import mchammer as mch  # noqa: INP001, D100
 import spindry as spd
+import stk
 
 # Building a cage from the examples on the stk docs.
 bb1 = stk.BuildingBlock(
@@ -23,16 +23,16 @@ host_guest = stk.ConstructedMolecule(
     )
 )
 
-host_molecule = spd.Molecule(
+host_molecule = mch.Molecule(
     atoms=(
-        spd.Atom(
+        mch.Atom(
             id=atom.get_id(),
             element_string=atom.__class__.__name__,
         )
         for atom in cage.get_atoms()
     ),
     bonds=(
-        spd.Bond(
+        mch.Bond(
             id=i,
             atom_ids=(
                 bond.get_atom1().get_id(),
@@ -43,16 +43,16 @@ host_molecule = spd.Molecule(
     ),
     position_matrix=(cage.get_position_matrix()),
 )
-guest_molecule = spd.Molecule(
+guest_molecule = mch.Molecule(
     atoms=(
-        spd.Atom(
+        mch.Atom(
             id=atom.get_id(),
             element_string=atom.__class__.__name__,
         )
         for atom in stk_guests[0].get_atoms()
     ),
     bonds=(
-        spd.Bond(
+        mch.Bond(
             id=i,
             atom_ids=(
                 bond.get_atom1().get_id(),

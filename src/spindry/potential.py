@@ -1,33 +1,21 @@
 """Classes for calculating the potential energy of supramolecules."""
 
+from __future__ import annotations
+
 from itertools import combinations
+from typing import TYPE_CHECKING
 
 import numpy as np
 from scipy.spatial.distance import cdist
 
-
-class Potential:
-    """Base class for potential calculators."""
-
-    def __init__(self):
-        """Initialize a :class:`Spinner` instance."""
-
-    def compute_potential(self, supramolecule):
-        """Calculate potential energy.
-
-        Parameters
-        ----------
-        supramolecular : :class:`spd.Supramolecule`
-            Supramolecule to evaluate.
-
-        """
-        raise NotImplementedError
+if TYPE_CHECKING:
+    from .supramolecule import SupraMolecule
 
 
 class SpdPotential:
     """Default spindry non-bonded potential function."""
 
-    def __init__(self, nonbond_epsilon=5):
+    def __init__(self, nonbond_epsilon: float = 5) -> None:
         """Initialize a :class:`Spinner` instance.
 
         Parameters
@@ -40,7 +28,11 @@ class SpdPotential:
         """
         self._nonbond_epsilon = nonbond_epsilon
 
-    def _nonbond_potential(self, distance, sigmas):
+    def _nonbond_potential(
+        self,
+        distance: np.ndarray,
+        sigmas: np.ndarray,
+    ) -> np.ndarray:
         """Define a Lennard-Jones nonbonded potential.
 
         This potential has no relation to an empircal forcefield.
@@ -50,10 +42,7 @@ class SpdPotential:
             (sigmas / distance) ** 12 - (sigmas / distance) ** 6
         )
 
-    def _mixing_function(self, val1, val2):
-        return (val1 + val2) / 2
-
-    def _combine_sigma(self, radii1, radii2):
+    def _combine_sigma(self, radii1: tuple, radii2: tuple) -> np.ndarray:
         """Combine radii using Lorentz-Berthelot rules."""
         len1 = len(radii1)
         len2 = len(radii2)
@@ -61,14 +50,15 @@ class SpdPotential:
         mixed = np.zeros((len1, len2))
         for i in range(len1):
             for j in range(len2):
-                mixed[i, j] = self._mixing_function(
-                    radii1[i],
-                    radii2[j],
-                )
+                mixed[i, j] = (radii1[i] + radii2[j]) / 2
 
         return mixed
 
-    def _compute_nonbonded_potential(self, position_matrices, radii):
+    def _compute_nonbonded_potential(
+        self,
+        position_matrices: list[np.ndarray],
+        radii: list[tuple],
+    ) -> float:
         nonbonded_potential = 0
         for pos_mat_pair, radii_pair in zip(
             combinations(position_matrices, 2),
@@ -85,14 +75,15 @@ class SpdPotential:
 
         return nonbonded_potential
 
-    def compute_potential(self, supramolecule):
-        component_position_matrices = (
+    def compute_potential(self, supramolecule: SupraMolecule) -> float:
+        """Compute the potential energy of a supramolecule."""
+        component_position_matrices = [
             i.get_position_matrix() for i in supramolecule.get_components()
-        )
-        component_radii = (
+        ]
+        component_radii = [
             tuple(j.get_radius() for j in i.get_atoms())
             for i in supramolecule.get_components()
-        )
+        ]
         return self._compute_nonbonded_potential(
             position_matrices=component_position_matrices,
             radii=component_radii,

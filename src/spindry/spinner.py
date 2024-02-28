@@ -1,12 +1,20 @@
 """Generator of host guest conformations using nonbonded interactions."""
 
+from __future__ import annotations
+
 import random
+from typing import TYPE_CHECKING
 
 import numpy as np
 
 from .potential import SpdPotential
 from .supramolecule import SupraMolecule
 from .utilities import rotation_matrix_arbitrary_axis
+
+if TYPE_CHECKING:
+    from collections import abc
+
+    import mchammer as mch
 
 
 class Spinner:
@@ -17,16 +25,16 @@ class Spinner:
 
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
-        step_size,
-        rotation_step_size,
-        num_conformers,
-        max_attempts=1000,
-        potential_function=SpdPotential(5),
-        beta=2,
-        random_seed=1000,
-    ):
+        step_size: float,
+        rotation_step_size: float,
+        num_conformers: int,
+        max_attempts: int = 1000,
+        potential_function: SpdPotential | None = None,
+        beta: float = 2,
+        random_seed: int | None = 1000,
+    ) -> None:
         """Initialize a :class:`Spinner` instance.
 
         Parameters
@@ -55,29 +63,42 @@ class Spinner:
         random_seed : :class:`int` or :class:`NoneType`, optional
             Random seed to use for MC algorithm. Should only be set to
             ``None`` if system-based random seed is desired. Defaults
-            to 1000.
+            to a set seed of 1000, to avoid randomness.
 
         """
         self._step_size = step_size
         self._num_conformers = num_conformers
         self._rotation_step_size = rotation_step_size
         self._max_attempts = max_attempts
-        self._potential_function = potential_function
+        if potential_function is None:
+            self._potential_function = SpdPotential(5)
+        else:
+            self._potential_function = potential_function
         self._beta = beta
         if random_seed is None:
-            np.random.seed()
             random.seed()
+            np.random.seed()  # noqa: NPY002
         else:
-            np.random.seed(random_seed)
             random.seed(random_seed)
+            np.random.seed(random_seed)  # noqa: NPY002
 
-    def _compute_potential(self, supramolecule):
+    def _compute_potential(self, supramolecule: SupraMolecule) -> float:
         return self._potential_function.compute_potential(supramolecule)
 
-    def _translate_atoms_along_vector(self, mol, vector):
+    def _translate_atoms_along_vector(
+        self,
+        mol: SupraMolecule,
+        vector: np.ndarray,
+    ) -> SupraMolecule:
         return mol.with_displacement(vector)
 
-    def _rotate_atoms_by_angle(self, mol, angle, axis, origin):
+    def _rotate_atoms_by_angle(
+        self,
+        mol: SupraMolecule,
+        angle: float,
+        axis: np.ndarray,
+        origin: np.ndarray,
+    ) -> SupraMolecule:
         new_position_matrix = mol.get_position_matrix()
         # Set the origin of the rotation to "origin".
         new_position_matrix = new_position_matrix - origin
@@ -89,22 +110,22 @@ class Spinner:
         # Return the centroid of the molecule to the original position.
         new_position_matrix = new_position_matrix + origin
 
-        mol = mol.with_position_matrix(new_position_matrix)
-        return mol
+        return mol.with_position_matrix(new_position_matrix)
 
-    def _test_move(self, curr_pot, new_pot):
+    def _test_move(self, curr_pot: float, new_pot: float) -> bool:
         if new_pot < curr_pot:
             return True
-        else:
-            exp_term = np.exp(-self._beta * (new_pot - curr_pot))
-            rand_number = random.random()
 
-            if exp_term > rand_number:
-                return True
-            else:
-                return False
+        exp_term = np.exp(-self._beta * (new_pot - curr_pot))
+        rand_number = random.random()  # noqa: S311
 
-    def _run_step(self, supramolecule, movable_components):
+        return exp_term > rand_number
+
+    def _run_step(
+        self,
+        supramolecule: SupraMolecule,
+        movable_components: tuple[int, ...] | None,
+    ) -> tuple[SupraMolecule, float]:
         component_list = list(supramolecule.get_components())
         component_sizes = {
             i: mol.get_num_atoms() for i, mol in enumerate(component_list)
@@ -128,17 +149,17 @@ class Spinner:
                     i for i in range(len(component_list))
                 )
 
-        targ_comp_id = random.choice(
+        targ_comp_id = random.choice(  # noqa: S311
             [i for i in range(len(component_list)) if i in movable_components]
         )
 
         targ_comp = component_list[targ_comp_id]
 
         # Random number from -1 to 1 for multiplying translation.
-        rand = (random.random() - 0.5) * 2
+        rand = (random.random() - 0.5) * 2  # noqa: S311
 
         # Random translation direction.
-        rand_vector = np.random.rand(3)
+        rand_vector = np.random.rand(3)  # noqa: NPY002
         rand_vector = rand_vector / np.linalg.norm(rand_vector)
 
         # Perform translation.
@@ -150,9 +171,9 @@ class Spinner:
 
         # Define a random rotation of the guest.
         # Random number from -1 to 1 for multiplying rotation.
-        rand = (random.random() - 0.5) * 2
+        rand = (random.random() - 0.5) * 2  # noqa: S311
         rotation_angle = self._rotation_step_size * rand
-        rand_axis = np.random.rand(3)
+        rand_axis = np.random.rand(3)  # noqa: NPY002
         rand_axis = rand_axis / np.linalg.norm(rand_vector)
 
         # Perform rotation.
@@ -173,10 +194,10 @@ class Spinner:
 
     def get_conformers(
         self,
-        supramolecule,
-        movable_components=None,
-        verbose=False,
-    ):
+        supramolecule: SupraMolecule,
+        movable_components: tuple[int, ...] | None = None,
+        verbose: bool = False,  # noqa: FBT001, FBT002
+    ) -> abc.Iterable[mch.Molecule]:
         """Get conformers of supramolecule.
 
         Parameters
@@ -206,7 +227,8 @@ class Spinner:
             potential=nonbonded_potential,
         )
         cids_passed = []
-        for step in range(1, self._max_attempts):
+        count = 0
+        for _ in range(1, self._max_attempts):
             n_supramolecule, n_nonbonded_potential = self._run_step(
                 supramolecule=supramolecule,
                 movable_components=movable_components,
@@ -227,20 +249,20 @@ class Spinner:
                     n_supramolecule.get_position_matrix()
                 )
                 yield supramolecule
-
+            count += 1
             if len(cids_passed) == self._num_conformers:
                 break
 
         if verbose:
-            print(
-                f"{len(cids_passed)} conformers generated in {step} " "steps."
+            print(  # noqa: T201
+                f"{len(cids_passed)} conformers generated in {count} steps."
             )
 
     def get_final_conformer(
         self,
-        supramolecule,
-        movable_components=None,
-    ):
+        supramolecule: SupraMolecule,
+        movable_components: tuple[int, ...] | None = None,
+    ) -> mch.Molecule:
         """Get final conformer of supramolecule.
 
         Parameters
@@ -260,7 +282,7 @@ class Spinner:
             The host-guest supramolecule.
 
         """
-        for conformer in self.get_conformers(
+        for conformer in self.get_conformers(  # noqa: B007
             supramolecule=supramolecule,
             movable_components=movable_components,
         ):

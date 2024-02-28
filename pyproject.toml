@@ -34,12 +34,12 @@ dev = [
 github = "https://github.com/andrewtarzia/SpinDry"
 
 [tool.setuptools_scm]
-write_to = "spindry/_version.py"
+write_to = "src/spindry/_version.py"
 
 [tool.setuptools.packages.find]
 where = [
   # list of folders that contain the packages (["."] by default)
-  "spindry",
+  "src/",
 ]
 
 [tool.ruff]
@@ -98,5 +98,8 @@ disallow_any_generics = false
 [[tool.mypy.overrides]]
 module = [
   "matplotlib.*",
+  "mchammer.*",
+  "networkx.*",
+  "scipy.*",
 ]
 ignore_missing_imports = true

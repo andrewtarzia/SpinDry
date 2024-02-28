@@ -1,12 +1,13 @@
+import mchammer as mch
 import numpy as np
-
 import spindry as spd
+
 from tests.utilities import is_equivalent_spd_molecule
 
 
 def test_opt(
     spinner: spd.Spinner,
-    smolecule: spd.Molecule,
+    smolecule: mch.Molecule,
     final_pos_mat: np.ndarray,
     final_potential: float,
 ) -> None:
@@ -19,15 +20,15 @@ def test_opt(
         )
     )
     assert np.isclose(
-        spinner._compute_potential(test),
+        spinner._compute_potential(test),  # noqa: SLF001
         final_potential,
     )
 
 
 def test_opt_spd(
     spd_spinner: spd.Spinner,
-    spd_host: spd.Molecule,
-    spd_guest: spd.Molecule,
+    spd_host: mch.Molecule,
+    spd_guest: mch.Molecule,
     spd_supramolecule: spd.SupraMolecule,
 ) -> None:
     test = spd_spinner.get_final_conformer(spd_supramolecule)
@@ -47,8 +48,8 @@ def test_opt_spd(
 
 def test_opt_spd_components(
     spd_spinner: spd.Spinner,
-    spd_host: spd.Molecule,
-    spd_guest: spd.Molecule,
+    spd_host: mch.Molecule,
+    spd_guest: mch.Molecule,
     spd_supramolecule: spd.SupraMolecule,
 ) -> None:
     test = spd_spinner.get_final_conformer(spd_supramolecule)
