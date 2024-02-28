@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import typing
+from dataclasses import dataclass
 
 import mchammer as mch
 import networkx as nx
@@ -12,21 +13,11 @@ if typing.TYPE_CHECKING:
     from collections import abc
 
 
+@dataclass
 class SupraMolecule(mch.Molecule):
-    """Representation of a supramolecule containing atoms and positions."""
+    """Representation of a supramolecule containing atoms and positions.
 
-    def __init__(  # noqa: PLR0913
-        self,
-        atoms: tuple[mch.Atom],
-        bonds: tuple[mch.Bond],
-        position_matrix: np.ndarray,
-        cid: int | None = None,
-        potential: float | None = None,
-    ) -> None:
-        """Initialize a :class:`Supramolecule` instance.
-
-        Parameters
-        ----------
+    Attributes:
         atoms : :class:`iterable` of :class:`.Atom`
             Atoms that define the molecule.
 
@@ -43,16 +34,24 @@ class SupraMolecule(mch.Molecule):
         potential : :class:`float`, optional
             Potential energy of Supramolecule.
 
-        """
-        self._atoms = tuple(atoms)
-        self._bonds = tuple(bonds)
-        self._position_matrix = np.array(
-            position_matrix.T,
+    """
+
+    atoms: tuple[mch.Atom, ...]
+    bonds: tuple[mch.Bond, ...]
+    position_matrix: np.ndarray
+    cid: int | None = None
+    potential: float | None = None
+
+    def __post_init__(self) -> None:
+        """Post initialization of molecule."""
+        self.atoms = tuple(self.atoms)
+        self.bonds = tuple(self.bonds)
+        self.position_matrix = np.array(
+            self.position_matrix.T,
             dtype=np.float64,
         )
+
         self._define_components()
-        self._cid = cid
-        self._potential = potential
 
     def with_position_matrix(
         self,
@@ -70,15 +69,33 @@ class SupraMolecule(mch.Molecule):
         _temp_components = tuple(self.get_components())
 
         _temp_supramolecule = SupraMolecule(
-            atoms=self._atoms,
-            bonds=self._bonds,
+            atoms=tuple(self.atoms),
+            bonds=tuple(self.bonds),
             position_matrix=np.array(position_matrix),
-            cid=self._cid,
-            potential=self._potential,
+            cid=self.cid,
+            potential=self.potential,
         )
         # Overwrite redefined components.
-        _temp_supramolecule._components = _temp_components  # noqa: SLF001
+        _temp_supramolecule.components = _temp_components
         return _temp_supramolecule
+
+    def with_displacement(self, displacement: np.ndarray) -> SupraMolecule:
+        """Return a displaced clone Molecule.
+
+        Parameters
+        ----------
+        displacement : :class:`numpy.ndarray`
+            The displacement vector to be applied.
+
+        """
+        new_position_matrix = self.position_matrix.T + displacement
+        return SupraMolecule(
+            atoms=tuple(self.atoms),
+            bonds=tuple(self.bonds),
+            cid=self.cid,
+            potential=self.potential,
+            position_matrix=np.array(new_position_matrix),
+        )
 
     @classmethod
     def init_from_components(
@@ -141,14 +158,12 @@ class SupraMolecule(mch.Molecule):
                 position_matrix.append(pos)  # noqa: PERF402
 
         supramolecule: SupraMolecule = cls.__new__(cls)
-        supramolecule._atoms = tuple(atoms)  # noqa: SLF001
-        supramolecule._bonds = tuple(bonds)  # noqa: SLF001
-        supramolecule._components = tuple(components)  # noqa: SLF001
-        supramolecule._cid = cid  # noqa: SLF001
-        supramolecule._potential = potential  # noqa: SLF001
-        supramolecule._position_matrix = np.array(  # noqa: SLF001
-            position_matrix
-        ).T
+        supramolecule.atoms = tuple(atoms)
+        supramolecule.bonds = tuple(bonds)
+        supramolecule.components = tuple(components)
+        supramolecule.cid = cid
+        supramolecule.potential = potential
+        supramolecule.position_matrix = np.array(position_matrix).T
         return supramolecule
 
     def _define_components(self) -> None:
@@ -160,7 +175,7 @@ class SupraMolecule(mch.Molecule):
             mol_graph.add_node(atom.get_id())
 
         # Add edges.
-        for bond in self._bonds:
+        for bond in self.bonds:
             pair_ids = (bond.get_atom1_id(), bond.get_atom2_id())
             mol_graph.add_edge(*pair_ids)
 
@@ -168,18 +183,18 @@ class SupraMolecule(mch.Molecule):
         comps = []
         for c in nx.connected_components(mol_graph):
             c_ids = sorted(c)
-            in_atoms = [i for i in self._atoms if i.get_id() in c]
+            in_atoms = [i for i in self.atoms if i.get_id() in c]
             in_bonds = [
                 i
-                for i in self._bonds
+                for i in self.bonds
                 if i.get_atom1_id() in c and i.get_atom2_id() in c
             ]
-            new_pos_matrix = self._position_matrix[:, list(c_ids)].T
+            new_pos_matrix = self.position_matrix[:, list(c_ids)].T
             comps.append(mch.Molecule(in_atoms, in_bonds, new_pos_matrix))
 
-        self._components = tuple(comps)
+        self.components = tuple(comps)
 
-    def _write_xyz_content(self) -> list[str]:
+    def write_xyz_content(self) -> list[str]:
         """Write basic `.xyz` file content of Molecule."""
         coords = self.get_position_matrix()
         content = ["0"]
@@ -187,21 +202,21 @@ class SupraMolecule(mch.Molecule):
             x, y, z = (i for i in coords[atom.get_id()])
             content.append(f"{atom.get_element_string()} {x:f} {y:f} {z:f}\n")
         # Set first line to the atom_count.
-        content[0] = f"{i}\ncid:{self._cid}, pot: {self._potential}\n"
+        content[0] = f"{i}\ncid:{self.cid}, pot: {self.potential}\n"
 
         return content
 
     def get_components(self) -> abc.Iterable[mch.Molecule]:
         """Yields each molecular component."""
-        yield from self._components
+        yield from self.components
 
     def get_cid(self) -> int | None:
         """Get conformer id."""
-        return self._cid
+        return self.cid
 
     def get_potential(self) -> float | None:
         """Get potential energy."""
-        return self._potential
+        return self.potential
 
     def __str__(self) -> str:
         """String representation of SupraMolecule."""
