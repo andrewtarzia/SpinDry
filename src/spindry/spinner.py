@@ -2,19 +2,16 @@
 
 from __future__ import annotations
 
-import random
 from typing import TYPE_CHECKING
 
+import mchammer as mch
 import numpy as np
 
 from .potential import SpdPotential
 from .supramolecule import SupraMolecule
-from .utilities import rotation_matrix_arbitrary_axis
 
 if TYPE_CHECKING:
     from collections import abc
-
-    import mchammer as mch
 
 
 class Spinner:
@@ -81,43 +78,8 @@ class Spinner:
             self._generator = np.random.default_rng(random_seed)
 
     def compute_potential(self, supramolecule: SupraMolecule) -> float:
+        """Compute the potential of a supramolecule."""
         return self._potential_function.compute_potential(supramolecule)
-
-    def _translate_atoms_along_vector(
-        self,
-        mol: SupraMolecule,
-        vector: np.ndarray,
-    ) -> SupraMolecule:
-        return mol.with_displacement(vector)
-
-    def _rotate_atoms_by_angle(
-        self,
-        mol: SupraMolecule,
-        angle: float,
-        axis: np.ndarray,
-        origin: np.ndarray,
-    ) -> SupraMolecule:
-        new_position_matrix = mol.get_position_matrix()
-        # Set the origin of the rotation to "origin".
-        new_position_matrix = new_position_matrix - origin
-        # Perform rotation.
-        rot_mat = rotation_matrix_arbitrary_axis(angle, axis)
-        # Apply the rotation matrix on the position matrix, to get the
-        # new position matrix.
-        new_position_matrix = (rot_mat @ new_position_matrix.T).T
-        # Return the centroid of the molecule to the original position.
-        new_position_matrix = new_position_matrix + origin
-
-        return mol.with_position_matrix(new_position_matrix)
-
-    def _test_move(self, curr_pot: float, new_pot: float) -> bool:
-        if new_pot < curr_pot:
-            return True
-
-        exp_term = np.exp(-self._beta * (new_pot - curr_pot))
-        rand_number = random.random()  # noqa: S311
-
-        return exp_term > rand_number
 
     def _run_step(
         self,
@@ -175,7 +137,7 @@ class Spinner:
         rand_axis = rand_axis / np.linalg.norm(rand_vector)
 
         # Perform rotation.
-        targ_comp = self._rotate_atoms_by_angle(
+        targ_comp = mch.rotate_molecule_by_angle(
             mol=targ_comp,
             angle=rotation_angle,
             axis=rand_axis,
@@ -187,7 +149,7 @@ class Spinner:
             components=component_list,
         )
 
-        nonbonded_potential = self._compute_potential(supramolecule)
+        nonbonded_potential = self.compute_potential(supramolecule)
         return supramolecule, nonbonded_potential
 
     def get_conformers(
@@ -217,7 +179,7 @@ class Spinner:
 
         """
         cid = 0
-        nonbonded_potential = self._compute_potential(supramolecule)
+        nonbonded_potential = self.compute_potential(supramolecule)
 
         yield SupraMolecule.init_from_components(
             components=list(supramolecule.get_components()),
@@ -231,6 +193,9 @@ class Spinner:
                 supramolecule=supramolecule,
                 movable_components=movable_components,
             )
+            passed = mch.test_move(
+                beta=self._beta,
+                curr_pot=nonbonded_potential,
                 new_pot=n_nonbonded_potential,
                 generator=self._generator,
             )
