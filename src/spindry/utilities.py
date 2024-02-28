@@ -1,8 +1,11 @@
 """This module defines general-purpose objects, functions and classes."""
 
+import itertools as it
+
 import numpy as np
-from scipy.spatial.distance import euclidean
-from scipy.spatial.transform import Rotation
+from scipy.spatial.distance import cdist, euclidean
+
+from .supramolecule import SupraMolecule
 
 
 def get_atom_distance(
@@ -16,44 +19,27 @@ def get_atom_distance(
     )
 
 
-def rotation_matrix_arbitrary_axis(
-    angle: float,
-    axis: np.ndarray,
-) -> np.ndarray:
-    """Returns a rotation matrix of `angle` radians about `axis`.
+def calculate_min_atom_distance(supramolecule: SupraMolecule) -> float:
+    """Calculate the minimum distance between components in supramolecule."""
+    component_position_matrices = (
+        i.get_position_matrix() for i in supramolecule.get_components()
+    )
 
-    Parameters
-    ----------
-    angle : :class:`float`
-        The size of the rotation in radians.
-    axis : :class:`numpy.ndarray`
-        A 3 element aray which represents a vector. The vector is the
-        axis about which the rotation is carried out. Must be of
-        unit magnitude.
+    min_distance = 1e24
+    for pos_mat_pair in it.combinations(component_position_matrices, 2):
+        pair_dists = cdist(pos_mat_pair[0], pos_mat_pair[1])
+        min_distance = min([min_distance, min(pair_dists.flatten())])
 
-    Returns:
-    -------
-    :class:`numpy.ndarray`
-        A ``3x3`` array representing a rotation matrix.
-    """
-    a = np.cos(angle / 2)
-    b, c, d = axis * np.sin(angle / 2)
+    return min_distance
 
-    e11 = np.square(a) + np.square(b) - np.square(c) - np.square(d)
-    e12 = 2 * (b * c - a * d)
-    e13 = 2 * (b * d + a * c)
 
-    e21 = 2 * (b * c + a * d)
-    e22 = np.square(a) + np.square(c) - np.square(b) - np.square(d)
-    e23 = 2 * (c * d - a * b)
+def calculate_centroid_distance(supramolecule: SupraMolecule) -> float:
+    """Calculate the centroid distances in 1:1 complex."""
+    comps = list(supramolecule.get_components())
+    if len(comps) != 2:  # noqa: PLR2004
+        msg = "more than one guest there buddy!"
+        raise ValueError(msg)
 
-    e31 = 2 * (b * d - a * c)
-    e32 = 2 * (c * d + a * b)
-    e33 = np.square(a) + np.square(d) - np.square(b) - np.square(c)
-
-    # Initialize as a scipy Rotation object, which normalizes the
-    # matrix and allows for returns as quaternion or alternative
-    # type in the future.
-    return Rotation.from_matrix(
-        np.array([[e11, e12, e13], [e21, e22, e23], [e31, e32, e33]])
-    ).as_matrix()
+    return float(
+        np.linalg.norm(comps[0].get_centroid() - comps[1].get_centroid())
+    )
