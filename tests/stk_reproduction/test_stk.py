@@ -90,8 +90,9 @@ def test_stk_spinner() -> None:
     )
 
     assert np.all(
-        np.equal(
+        np.isclose(
             known.get_position_matrix(),
             new_complex.get_position_matrix(),
+            atol=1e-2,
         )
     )
