@@ -13,6 +13,8 @@ from .supramolecule import SupraMolecule
 if TYPE_CHECKING:
     from collections import abc
 
+    from .potential import Potential
+
 
 class Spinner:
     """Generate host-guest conformations by rotating guest.
@@ -28,7 +30,7 @@ class Spinner:
         rotation_step_size: float,
         num_conformers: int,
         max_attempts: int = 1000,
-        potential_function: SpdPotential | None = None,
+        potential_function: Potential | None = None,
         beta: float = 2,
         random_seed: int | None = 1000,
     ) -> None:
@@ -69,7 +71,7 @@ class Spinner:
         if potential_function is None:
             self._potential_function = SpdPotential(5)
         else:
-            self._potential_function = potential_function
+            self._potential_function = potential_function  # type: ignore[assignment]
         self._beta = beta
         if random_seed is None:
             self._generator = np.random.default_rng()
