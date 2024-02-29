@@ -22,6 +22,7 @@ Potentials
 .. toctree::
   :maxdepth: 1
 
+  Potential <_autosummary/spindry.Potential>
   SpdPotential <_autosummary/spindry.SpdPotential>
   VaryingEpsilonPotential <_autosummary/spindry.VaryingEpsilonPotential>
 

@@ -19,6 +19,7 @@
       Atom
       Bond
       Molecule
+      Potential
       SpdPotential
       Spinner
       SupraMolecule

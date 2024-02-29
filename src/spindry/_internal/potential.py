@@ -12,7 +12,20 @@ if TYPE_CHECKING:
     from .supramolecule import SupraMolecule
 
 
-class SpdPotential:
+class Potential:
+    """Base class for potential calculators."""
+
+    def compute_potential(self, supramolecule: SupraMolecule) -> float:
+        """Calculate potential energy.
+
+        Parameters:
+            supramolecular:
+                Supramolecule to evaluate.
+        """
+        raise NotImplementedError
+
+
+class SpdPotential(Potential):
     """Default spindry non-bonded potential function."""
 
     def __init__(self, nonbond_epsilon: float = 5) -> None:
@@ -90,7 +103,7 @@ class SpdPotential:
         )
 
 
-class VaryingEpsilonPotential:
+class VaryingEpsilonPotential(Potential):
     """A non-bonded potential function with varying epsilons."""
 
     def _nonbond_potential(
@@ -166,11 +179,11 @@ class VaryingEpsilonPotential:
             i.get_position_matrix() for i in supramolecule.get_components()
         ]
         component_radii = [
-            tuple(j.get_sigma() for j in i.get_atoms())
+            tuple(j.sigma for j in i.get_atoms())
             for i in supramolecule.get_components()
         ]
         component_epsilon = [
-            tuple(j.get_epsilon() for j in i.get_atoms())
+            tuple(j.epsilon for j in i.get_atoms())
             for i in supramolecule.get_components()
         ]
         return self._compute_nonbonded_potential(
