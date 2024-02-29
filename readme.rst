@@ -18,7 +18,7 @@ Install using pip:
 
 .. code-block:: bash
 
-  pip install stk
+  pip install spindry
 
 Algorithm
 ---------

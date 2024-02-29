@@ -23,7 +23,7 @@ check:
   ( set -x; mypy src )
 
   echo
-  ( set -x; pytest --cov=spindry --cov-report term-missing )
+  ( set -x; pytest --cov=src --cov-report term-missing )
 
   test $error = 0
 

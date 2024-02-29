@@ -1,13 +1,13 @@
 .. toctree::
-   :hidden:
-   :caption: SpinDry
-   :maxdepth: 2
+  :hidden:
+  :maxdepth: 0
+  :caption: SpinDry
 
-   Analysis <analysis>
+  SpinDry <spd>
 
 .. toctree::
   :hidden:
-  :maxdepth: 2
+  :maxdepth: 0
   :caption: Modules:
 
   Modules <modules>
@@ -18,112 +18,140 @@ Introduction
 
 | GitHub: https://www.github.com/andrewtarzia/SpinDry
 
+:mod:`.spindry` is a Monte Carlo-based host-guest conformer generator using
+cheap and unphysical potentials.
 
-.. important::
+Please submit an issue with any questions or bugs!
 
-  **Warning**: DOCS underdevelopment.
+``SpinDry`` uses the Monte-Carlo/molecule interface provided by my other code
+``MCHammer`` (https://github.com/andrewtarzia/MCHammer).
 
-:mod:`.CGExplore` is a Python library for for working with
-coarse-grained models.
 
-The library is built off of `stk <https://stk.readthedocs.io/en/stable/>`_,
-which comes with the pip install.
 
-.. important::
+Usage with *stk*
+----------------
 
-  **Warning**: This package is still very much underdevelopment and many changes
-  are expected.
+:mod:`.spindry` optimisers (``Spinner``) are available by default in ``stk``
+as:
+
+.. code-block:: python
+
+  import stk
+
+  host = stk.ConstructedMolecule(
+      topology_graph=stk.cage.FourPlusSix(
+          building_blocks=(
+              stk.BuildingBlock(
+                  smiles='NC1CCCCC1N',
+                  functional_groups=[
+                      stk.PrimaryAminoFactory(),
+                  ],
+              ),
+              stk.BuildingBlock(
+                  smiles='O=Cc1cc(C=O)cc(C=O)c1',
+                  functional_groups=[stk.AldehydeFactory()],
+              ),
+          ),
+          optimizer=stk.MCHammer(),
+      ),
+  )
+  guest1 = stk.host_guest.Guest(
+      building_block=stk.BuildingBlock('BrBr'),
+      displacement=(0., 3., 0.),
+  )
+  guest2 = stk.host_guest.Guest(
+      building_block=stk.BuildingBlock('C1CCCC1'),
+  )
+
+  hgcomplex = stk.ConstructedMolecule(
+      topology_graph=stk.host_guest.Complex(
+          host=stk.BuildingBlock.init_from_molecule(host),
+          guests=(guest1, guest2),
+          optimizer=stk.Spinner(),
+      ),
+  )
+
+
 
 Installation
 ------------
 
-To install :mod:`.CGExplore`, you need to follow these steps:
+Install using pip:
 
-Create a `conda` or `mamba` environment::
+.. code-block:: bash
 
-  mamba create -n NAME python=3.11
-
-Activate the environment::
-
-  conda activate NAME
+  pip install spindry
 
 
-Install :mod:`.CGExplore` with pip::
+Algorithm
+---------
 
-  pip install cgexplore
+SpinDry implements a simple Metropolis Monte-Carlo algorithm to translate and
+rotate the guest molecules.
+All atom positions/bond lengths within the host and guest are kept rigid and
+do not contribute to the potential energy.
+The algorithm uses, by default, a simple Lennard-Jones nonbonded potential to
+define the potential energy surface such that steric clashes are avoided. Atom
+radii are taken from STREUSSEL (https://github.com/hmsoregon/STREUSEL).
+Custom potential functions can also be defined now -- see
+``examples/custom_potential_function.py``.
 
+The default MC algorithm is as follows:
 
-Install `OpenMM` `docs <https://openmm.org/>`_::
+For ``step`` in *N* steps:
 
-  mamba install openmm
+    1. Define a translation of the guest by a random unit-vector and a random
+    [-1, 1) step along the that vector.
 
-or::
+    2. Define a rotation of the guest by a random [-1, 1) * ``rotation_step_size``
+    angle and a random unit axis.
 
-  conda install -c conda-forge openmm
+    3. Compute system potential ``U_nb``:
 
+        ``U_nb`` is the nonbonded potential, defined by the Lennard-Jones
+        potential:
 
-Install `openmmtools` `docs <https://openmmtools.readthedocs.io/en/stable/gettingstarted.html>`_::
+            ``U_nb = sum_i,j (epsilon_nb * ((sigma / r_ij)^12 - (sigma / r_ij)^6))``,
+            where ``epsilon_nb`` defines the strength of the potential,
+            ``sigma`` defines the position where the potential becomes
+            repulsive and ``r_ij`` is the pairwise distance between atoms
+            ``i`` and ``j``.
 
-  mamba install openmmtools
+    4. Accept or reject move:
 
-or::
+        Accept if ``U_i`` < ``U_(i-1)`` or ``exp(-beta(U_i - U_(i-1))`` >
+        ``R``, where ``R`` is a random number [0, 1) and ``beta`` is the
+        inverse Boltzmann temperature.
+        Reject otherwise.
 
-  conda config --add channels omnia --add channels conda-forge
-  conda install openmmtools
-
-
-Then, update directory structure in `env_set.py` if using example code.
-
-
-The library implements some analysis that uses `Shape 2.1`. Follow the
-instructions to download and installed at
-`Shape <https://www.iqtc.ub.edu/uncategorised/program-for-the-stereochemical-analysis-of-molecular-fragments-by-means-of-continous-shape-measures-and-associated-tools/>`_
-
-
-Developer Setup
----------------
-
-To develop with `CGExplore`, you should create a new environment as above, then:
-
-Clone :mod:`.CGExplore` from `here <https://github.com/andrewtarzia/CGExplore>`_
-
-From :mod:`.CGExplore` directory use `just <https://github.com/casey/just>`_ to
-install a dev environment with::
-
-  just dev
-
-And then follow the previous steps.
-
+    5. If ``num_conformers`` is met, quit.
 
 Examples
 --------
 
+The workflow for a porous organic cage built using *stk*
+(<https://stk.readthedocs.io/>) is shown in ``examples/`` for a single guest
+and multiple guests.
 
-The main series of examples are in `First Paper Example`_. In that page you
-will find all the information necessary to reproduce the work in
-`10.1039/D3SC03991A <https://doi.org/10.1039/D3SC03991A>`_
+The Spinner class yields a ``SupraMolecule`` conformer. Only conformers that
+pass the MC conditions are yielded. The examples in ``examples`` show how to
+access the structures of these conformers as ``.xyz`` files or `stk` molecules.
 
-With each pull request a test is run as a GitHub Action connected to this
-`repository <https://github.com/andrewtarzia/cg_model_test>`_.
-This ensures that the results obtained for a subset of the original data set do
-not change with changes to this library.
+Contributors and Acknowledgements
+---------------------------------
 
-.. note::
+I developed this code as a post doc in the Jelfs research group at Imperial
+College London (<http://www.jelfs-group.org/>,
+<https://github.com/JelfsMaterialsGroup>).
 
-  `cg_model_test <https://github.com/andrewtarzia/cg_model_test>`_ is a good
-  example of usage too!
+This code was reviewed and edited by: Lukas Turcani
+(<https://github.com/lukasturcani>)
 
+License
+-------
 
-New works done with :mod:`.CGExplore`:
+This project is licensed under the MIT license.
 
-* TBC.
-
-
-Acknowledgements
-----------------
-
-This work was completed during my time as a postdoc, and then research fellow
-in the Pavan group at PoliTO (https://www.gmpavanlab.com/).
 
 Indices and tables
 ------------------
