@@ -95,8 +95,13 @@ for i in np.arange(1, 2.1, 0.1):
     print(round(i, 2), round(conformer.get_potential(), 3))  # noqa: T201
 
 
-class CentroidFn(spd.Potential):
-    """A potential function based on the minimum host-guest distance."""
+class CentroidFn:
+    """A potential function based on the minimum host-guest distance.
+
+    Here we show that as long as you provide a `compute_potential` method, then
+    any class works!
+
+    """
 
     def compute_potential(self, supramolecule: spd.SupraMolecule) -> float:
         """Compute the potential."""
