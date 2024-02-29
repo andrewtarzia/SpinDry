@@ -77,8 +77,7 @@ def test_stk_spinner() -> None:
     new_complex = complex_unopt.with_position_matrix(
         position_matrix=conformer.get_position_matrix(),
     )
-    print("test", complex_opt.get_position_matrix())
-    print("new", new_complex.get_position_matrix())
+
     assert np.all(
         np.equal(
             complex_opt.get_position_matrix(),
@@ -89,8 +88,7 @@ def test_stk_spinner() -> None:
     known = stk.BuildingBlock.init_from_file(
         pathlib.Path(__file__).resolve().parent / "spinner.mol"
     )
-    print("test", known.get_position_matrix())
-    print("new", new_complex.get_position_matrix())
+
     assert np.all(
         np.equal(
             known.get_position_matrix(),

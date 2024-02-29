@@ -18,12 +18,11 @@ class SpdPotential:
     def __init__(self, nonbond_epsilon: float = 5) -> None:
         """Initialize a :class:`Spinner` instance.
 
-        Parameters
-        ----------
-        nonbond_epsilon : :class:`float`, optional
-            Value of epsilon used in the nonbond potential in MC moves.
-            Determines strength of the nonbond potential.
-            Defaults to 20.
+        Parameters:
+            nonbond_epsilon:
+                Value of epsilon used in the nonbond potential in MC moves.
+                Determines strength of the nonbond potential.
+                Defaults to 5.
 
         """
         self._nonbond_epsilon = nonbond_epsilon

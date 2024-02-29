@@ -17,7 +17,7 @@ if typing.TYPE_CHECKING:
 class SupraMolecule(mch.Molecule):
     """Representation of a supramolecule containing atoms and positions.
 
-    Attributes:
+    Parameters:
         atoms : :class:`iterable` of :class:`.Atom`
             Atoms that define the molecule.
 
@@ -59,11 +59,10 @@ class SupraMolecule(mch.Molecule):
     ) -> SupraMolecule:
         """Return clone SupraMolecule with new position matrix.
 
-        Parameters
-        ----------
-        position_matrix : :class:`numpy.ndarray`
-            A position matrix of the clone. The shape of the matrix
-            is ``(n, 3)``.
+        Parameters:
+            position_matrix:
+                A position matrix of the clone. The shape of the matrix
+                is ``(n, 3)``.
 
         """
         _temp_components = tuple(self.get_components())
@@ -82,10 +81,9 @@ class SupraMolecule(mch.Molecule):
     def with_displacement(self, displacement: np.ndarray) -> SupraMolecule:
         """Return a displaced clone Molecule.
 
-        Parameters
-        ----------
-        displacement : :class:`numpy.ndarray`
-            The displacement vector to be applied.
+        Parameters:
+            displacement:
+                The displacement vector to be applied.
 
         """
         new_position_matrix = self.position_matrix.T + displacement
@@ -106,16 +104,15 @@ class SupraMolecule(mch.Molecule):
     ) -> typing.Self:
         """Initialize a :class:`Supramolecule` instance from components.
 
-        Parameters
-        ----------
-        components : :class:`iterable` of :class:`.Molecule`
-            Molecular components that define the supramolecule.
+        Parameters:
+            components:
+                Molecular components that define the supramolecule.
 
-        cid : :class:`int`, optional
-            Conformer id of supramolecule.
+            cid:
+                Conformer id of supramolecule.
 
-        potential : :class:`float`, optional
-            Potential energy of Supramolecule.
+            potential:
+                Potential energy of Supramolecule.
 
         """
         atoms = []

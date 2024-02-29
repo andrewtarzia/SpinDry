@@ -34,33 +34,32 @@ class Spinner:
     ) -> None:
         """Initialize a :class:`Spinner` instance.
 
-        Parameters
-        ----------
-        step_size : :class:`float`
-            The relative size of the step to take during step.
+        Parameters:
+            step_size:
+                The relative size of the step to take during step.
 
-        rotation_step_size : :class:`float`
-            The relative size of the rotation to take during step.
+            rotation_step_size:
+                The relative size of the rotation to take during step.
 
-        num_conformers : :class:`int`
-            Number of conformers to extract.
+            num_conformers:
+                Number of conformers to extract.
 
-        max_attempts : :class:`int`
-            Maximum number of MC moves to try to generate conformers.
+            max_attempts:
+                Maximum number of MC moves to try to generate conformers.
 
-        potential_function : :class:`spd.Potential`
-            Function to calculate potential energy of a
-            :class:`spd.Supramolecule`
+            potential_function:
+                Function to calculate potential energy of a
+                :class:`spd.Supramolecule`
 
-        beta : :class:`float`, optional
-            Value of beta used in the in MC moves. Beta takes the
-            place of the inverse boltzmann temperature.
-            Defaults to 2.
+            beta:
+                Value of beta used in the in MC moves. Beta takes the
+                place of the inverse boltzmann temperature.
+                Defaults to 2.
 
-        random_seed : :class:`int` or :class:`NoneType`, optional
-            Random seed to use for MC algorithm. Should only be set to
-            ``None`` if system-based random seed is desired. Defaults
-            to a set seed of 1000, to avoid randomness.
+            random_seed:
+                Random seed to use for MC algorithm. Should only be set to
+                ``None`` if system-based random seed is desired. Defaults
+                to a set seed of 1000, to avoid randomness.
 
         """
         self._step_size = step_size
@@ -160,22 +159,19 @@ class Spinner:
     ) -> abc.Iterable[mch.Molecule]:
         """Get conformers of supramolecule.
 
-        Parameters
-        ----------
-        supramolecule : :class:`.SupraMolecule`
-            The supramolecule to optimize.
+        Parameters:
+            supramolecule:
+                The supramolecule to optimize.
 
-        movable_components : :class:`iterable` of :class:`int`,
-        optional
-            Components of supramolecule to move during simulation.
+            movable_components:
+                Components of supramolecule to move during simulation.
 
-        verbose : :class:`bool`
-            `True` to print some extra information.
+            verbose:
+                `True` to print some extra information.
 
         Yields:
-        ------
-        conformer : :class:`.SupraMolecule`
-            The host-guest supramolecule.
+            conformer: :class:`.SupraMolecule`
+                The host-guest supramolecule.
 
         """
         cid = 0
@@ -228,21 +224,18 @@ class Spinner:
     ) -> mch.Molecule:
         """Get final conformer of supramolecule.
 
-        Parameters
-        ----------
-        supramolecule : :class:`.SupraMolecule`
-            The supramolecule to optimize.
+        Parameters:
+            supramolecule:
+                The supramolecule to optimize.
 
-        movable_components : :class:`iterable` of :class:`int`,
-        optional
-            Components of supramolecule to move during simulation.
-            If `None`, then moved components are selected randomly,
-            and the largest component (host) is not moved.
+            movable_components:
+                Components of supramolecule to move during simulation.
+                If `None`, then moved components are selected randomly,
+                and the largest component (host) is not moved.
 
         Returns:
-        -------
-        conformer : :class:`.SupraMolecule`
-            The host-guest supramolecule.
+            conformer:
+                The host-guest supramolecule.
 
         """
         for conformer in self.get_conformers(  # noqa: B007
