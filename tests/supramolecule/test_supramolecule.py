@@ -1,7 +1,11 @@
 import numpy as np
+import spindry as spd
 
 
-def test_smolecule_define_components(smolecule, components):
+def test_smolecule_define_components(
+    smolecule: spd.SupraMolecule,
+    components: list,
+) -> None:
     tests = list(smolecule.get_components())
 
     assert len(tests) == len(components)
@@ -10,7 +14,9 @@ def test_smolecule_define_components(smolecule, components):
             assert a1.get_id() == a2.get_id()
             assert a1.get_element_string() == a2.get_element_string()
 
-        assert np.all(np.allclose(
-            test.get_position_matrix(),
-            comp.get_position_matrix(),
-        ))
+        assert np.all(
+            np.allclose(
+                test.get_position_matrix(),
+                comp.get_position_matrix(),
+            )
+        )

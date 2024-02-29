@@ -133,3 +133,4 @@ test_opt_output/
 examples/environment.yml
 
 .vscode
+src/spindry/_version.py

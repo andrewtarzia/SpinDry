@@ -1,80 +1,79 @@
-import stk
-import spindry as spd
+import mchammer as mch  # noqa: INP001, D100
 import numpy as np
-from scipy.spatial.distance import cdist
-
+import spindry as spd
+import stk
 
 # Building a cage from the examples on the stk docs.
 bb1 = stk.BuildingBlock(
-    smiles='O=CC(C=O)C=O',
+    smiles="O=CC(C=O)C=O",
     functional_groups=[stk.AldehydeFactory()],
 )
-bb2 = stk.BuildingBlock('NCCN', [stk.PrimaryAminoFactory()])
+bb2 = stk.BuildingBlock("NCCN", [stk.PrimaryAminoFactory()])
 
 cage = stk.ConstructedMolecule(
     topology_graph=stk.cage.FourPlusSix(
         building_blocks=(bb1, bb2),
     ),
 )
-cage.write('poc.mol')
+cage.write("poc.mol")
 # Always ensure initial structures are not entirely on top of each
 # other.
 stk_guests = (
-    (stk.BuildingBlock('CN1C=NC2=C1C(=O)N(C(=O)N2C)C'), (0., 0., 0.)),
+    (stk.BuildingBlock("CN1C=NC2=C1C(=O)N(C(=O)N2C)C"), (0.0, 0.0, 0.0)),
 )
 
 host_guest = stk.ConstructedMolecule(
     topology_graph=stk.host_guest.Complex(
         host=stk.BuildingBlock.init_from_molecule(cage),
         guests=[
-            stk.host_guest.Guest(i[0], displacement=i[1])
-            for i in stk_guests
+            stk.host_guest.Guest(i[0], displacement=i[1]) for i in stk_guests
         ],
     )
 )
 
 supramolecule = spd.SupraMolecule(
     atoms=(
-        spd.Atom(
+        mch.Atom(
             id=atom.get_id(),
             element_string=atom.__class__.__name__,
-        ) for atom in host_guest.get_atoms()
+        )
+        for atom in host_guest.get_atoms()
     ),
     bonds=(
-        spd.Bond(
+        mch.Bond(
             id=i,
             atom_ids=(
                 bond.get_atom1().get_id(),
                 bond.get_atom2().get_id(),
-            )
-        ) for i, bond in enumerate(host_guest.get_bonds())
+            ),
+        )
+        for i, bond in enumerate(host_guest.get_bonds())
     ),
     position_matrix=host_guest.get_position_matrix(),
 )
-print(supramolecule)
+print(supramolecule)  # noqa: T201
+
 
 class PotFn(spd.SpdPotential):
-    """
-    Scale the size of the guest radii.
+    """Scale the size of the guest radii."""
 
-    """
-
-    def __init__(self, guest_scale, nonbond_epsilon=5):
+    def __init__(self, guest_scale: float, nonbond_epsilon: float = 5) -> None:
+        """Initialize potential class."""
         self._guest_scale = guest_scale
         super().__init__(nonbond_epsilon)
 
-    def compute_potential(self, supramolecule):
+    def compute_potential(self, supramolecule: spd.SupraMolecule) -> float:
+        """Compute the potential."""
         component_position_matrices = (
-            i.get_position_matrix()
-            for i in supramolecule.get_components()
+            i.get_position_matrix() for i in supramolecule.get_components()
         )
-        component_radii = list(
+        component_radii = [
             tuple(j.get_radius() for j in i.get_atoms())
             for i in supramolecule.get_components()
-        )
+        ]
 
         component_radii[1] = [
-            i*self._guest_scale for i in component_radii[1]
+            i * self._guest_scale for i in component_radii[1]
         ]
         return self._compute_nonbonded_potential(
             position_matrices=component_position_matrices,
@@ -93,22 +92,22 @@ for i in np.arange(1, 2.1, 0.1):
     )
 
     conformer = cg.get_final_conformer(supramolecule)
-    print(round(i, 2), round(conformer.get_potential(), 3))
+    print(round(i, 2), round(conformer.get_potential(), 3))  # noqa: T201
 
 
-class CentroidFn(spd.Potential):
+class CentroidFn:
+    """A potential function based on the minimum host-guest distance.
+
+    Here we show that as long as you provide a `compute_potential` method, then
+    any class works!
+
     """
-    A potential function based on the minimum host-guest distance.
 
-    """
+    def compute_potential(self, supramolecule: spd.SupraMolecule) -> float:
+        """Compute the potential."""
+        centroids = [i.get_centroid() for i in supramolecule.get_components()]
 
-    def compute_potential(self, supramolecule):
-        centroids = list(
-            i.get_centroid()
-            for i in supramolecule.get_components()
-        )
-
-        return (10/np.linalg.norm(centroids[1]-centroids[0]))
+        return 10 / np.linalg.norm(centroids[1] - centroids[0])
 
 
 # Do not want to move, just get energy.
@@ -124,4 +123,4 @@ conformer = cg.get_final_conformer(supramolecule)
 opt_host_guest = host_guest.with_position_matrix(
     conformer.get_position_matrix()
 )
-opt_host_guest.write('custom_pot_fn_out.mol')
+opt_host_guest.write("custom_pot_fn_out.mol")
