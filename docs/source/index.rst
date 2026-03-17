@@ -28,6 +28,27 @@ Please submit an issue with any questions or bugs!
 
 
 
+Installation
+------------
+
+Install using pip:
+
+.. code-block:: bash
+
+  pip install spindry
+
+Developer Setup
+---------------
+
+To develop with :mod:`spindry`, you can clone the repo and use
+`just <https://github.com/casey/just>`_ and `uv <https://docs.astral.sh>`_
+to setup the dev environment:
+
+.. code-block:: bash
+
+  just setup
+
+
 Usage with *stk*
 ----------------
 
@@ -71,16 +92,6 @@ as:
       ),
   )
 
-
-
-Installation
-------------
-
-Install using pip:
-
-.. code-block:: bash
-
-  pip install spindry
 
 
 Algorithm
@@ -151,14 +162,3 @@ License
 -------
 
 This project is licensed under the MIT license.
-
-
-Indices and tables
-------------------
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
-
-.. _`First Paper Example`: first_paper_example.html

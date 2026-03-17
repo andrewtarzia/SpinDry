@@ -20,8 +20,6 @@ dev = [
   "mypy",
   "pip-tools",
   "pytest<8",
-  "pytest-datadir",
-  "pytest-lazy-fixture",
   "pytest-cov",
   "sphinx",
   "sphinx-copybutton",
@@ -49,40 +47,19 @@ exclude = []
 
 [tool.ruff.lint]
 select = ["ALL"]
-ignore = ["ANN101", "ANN401", "COM812", "ISC001", "G004", "PTH123"]
+ignore = ["ANN401", "COM812", "ISC001", "FBT001", "FBT002"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = [
-  "D100",
-  "D101",
-  "D102",
-  "D103",
-  "D104",
-  "D105",
-  "D106",
-  "D107",
-  "S101",
-  "INP001",
-  "T201",
-  "PLR0913",
-  "PLR2004",
+    "S101",
+    "D100",
+    "D103",
+    "D104",
 ]
 "docs/source/conf.py" = ["D100", "INP001"]
-
-[tool.pytest.ini_options]
-testpaths = [
-  "tests",
-]
-python_files = [
-    "test_*.py",
-    "*_test.py",
-]
-python_functions = [
-  "test_*",
-]
 
 [tool.mypy]
 show_error_codes = true
@@ -104,3 +81,6 @@ module = [
   "scipy.*",
 ]
 ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+addopts = "--cov=src --cov-report term-missing"

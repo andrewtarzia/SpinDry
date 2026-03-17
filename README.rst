@@ -1,7 +1,9 @@
 SpinDry
 =======
 
-:author: Andrew Tarzia
+:maintainers:
+  `andrewtarzia <https://github.com/andrewtarzia/>`_
+:documentation: https://spindry.readthedocs.io/en/latest/
 
 A Monte Carlo-based host-guest conformer generator using cheap and unphysical
 potentials.
@@ -19,6 +21,19 @@ Install using pip:
 .. code-block:: bash
 
   pip install spindry
+
+
+Developer Setup
+---------------
+
+To develop with ``spindry``, you can clone the repo and use
+`just <https://github.com/casey/just>`_ and `uv <https://docs.astral.sh>`_
+to setup the dev environment:
+
+.. code-block:: bash
+
+  just setup
+
 
 Algorithm
 ---------

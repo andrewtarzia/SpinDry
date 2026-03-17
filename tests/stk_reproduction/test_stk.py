@@ -1,8 +1,9 @@
 import pathlib
 
 import numpy as np
-import spindry as spd
 import stk
+
+import spindry as spd
 
 
 def test_stk_spinner() -> None:

@@ -1,6 +1,7 @@
 import mchammer as mch  # noqa: INP001, D100
-import spindry as spd
 import stk
+
+import spindry as spd
 
 # Building a cage from the examples on the stk docs.
 bb1 = stk.BuildingBlock(

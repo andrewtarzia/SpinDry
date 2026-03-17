@@ -97,7 +97,7 @@ class SupraMolecule(mch.Molecule):
 
     @classmethod
     def init_from_components(
-        cls,  # noqa: ANN102
+        cls,
         components: list[mch.Molecule],
         cid: int | None = None,
         potential: float | None = None,

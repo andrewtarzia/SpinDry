@@ -1,41 +1,46 @@
 # List all recipes.
 default:
-  @just --list
+    @just --list
 
-# Install development environment.
-dev:
-  pip install -e '.[dev]'
+# Do a dev install.
+setup:
+    uv sync --all-extras --dev
 
 # Run code checks.
 check:
-  #!/usr/bin/env bash
+    #!/usr/bin/env bash
 
-  error=0
-  trap error=1 ERR
+    error=0
+    trap error=1 ERR
 
-  echo
-  (set -x; ruff . )
+    echo
+    ( set -x; uv run ruff check . )
 
-  echo
-  ( set -x; ruff format --check . )
+    echo
+    ( set -x; uv run ruff format --check . )
 
-  echo
-  ( set -x; mypy src )
+    echo
+    ( set -x; uv run mypy src )
 
-  echo
-  ( set -x; pytest --cov=src --cov-report term-missing )
+    echo
+    ( set -x; uv run pytest --cov=src --cov-report term-missing )
 
-  test $error = 0
+    echo
+    ( set -x; uv run make -C docs doctest )
 
+    test $error = 0
 
 # Auto-fix code issues.
 fix:
-  ruff format .
-  ruff --fix .
+    uv run ruff format .
+    uv run ruff check --fix .
 
+# Build a release.
+build:
+    uv build
 
 # Build docs.
 docs:
-  rm -rf docs/source/_autosummary
-  make -C docs html
-  echo Docs are in $PWD/docs/build/html/index.html
+    rm -rf docs/source/_autosummary
+    uv run make -C docs html
+    echo Docs are in $PWD/docs/build/html/index.html
