@@ -15,8 +15,8 @@ if typing.TYPE_CHECKING:
 try:
     import stk
 except ImportError:
-    stk = None
-    stk.Molecule = None
+    stk = None  # type:ignore[assignment]
+    stk.Molecule = None  # type:ignore[assignment,misc]
 
 
 @dataclass
@@ -189,6 +189,10 @@ class SupraMolecule(mch.Molecule):
                 Potential energy of Supramolecule.
 
         """
+        if stk is None:
+            msg = "Install stk with pip to use this method."  # type:ignore[unreachable]
+            raise RuntimeError(msg)
+
         atoms = [
             mch.Atom(
                 id=atom.get_id(),
