@@ -42,26 +42,8 @@ def test_stk_spinner() -> None:
             guests=(guest1, guest2),
         ),
     )
-    supramolecule = spd.SupraMolecule(
-        atoms=(
-            spd.Atom(
-                id=atom.get_id(),
-                element_string=atom.__class__.__name__,
-            )
-            for atom in complex_unopt.get_atoms()
-        ),
-        bonds=(
-            spd.Bond(
-                id=i,
-                atom_ids=(
-                    bond.get_atom1().get_id(),
-                    bond.get_atom2().get_id(),
-                ),
-            )
-            for i, bond in enumerate(complex_unopt.get_bonds())
-        ),
-        position_matrix=complex_unopt.get_position_matrix(),
-    )
+    supramolecule = spd.SupraMolecule.init_from_stk(complex_unopt)
+
     # Run optimization.
     optimizer = spd.Spinner(
         potential_function=spd.SpdPotential(

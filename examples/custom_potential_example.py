@@ -2,7 +2,6 @@
 
 import pathlib
 
-import mchammer as mch
 import numpy as np
 import stk
 
@@ -43,26 +42,7 @@ def main() -> None:
         )
     )
 
-    supramolecule = spd.SupraMolecule(
-        atoms=(
-            mch.Atom(
-                id=atom.get_id(),
-                element_string=atom.__class__.__name__,
-            )
-            for atom in host_guest.get_atoms()
-        ),
-        bonds=(
-            mch.Bond(
-                id=i,
-                atom_ids=(
-                    bond.get_atom1().get_id(),
-                    bond.get_atom2().get_id(),
-                ),
-            )
-            for i, bond in enumerate(host_guest.get_bonds())
-        ),
-        position_matrix=host_guest.get_position_matrix(),
-    )
+    supramolecule = spd.SupraMolecule.init_from_stk(host_guest)
 
     class PotFn(spd.SpdPotential):
         """Scale the size of the guest radii."""

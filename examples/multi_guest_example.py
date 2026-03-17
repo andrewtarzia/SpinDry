@@ -2,7 +2,6 @@
 
 import pathlib
 
-import mchammer as mch
 import stk
 
 import spindry as spd
@@ -25,7 +24,7 @@ def main() -> None:
             building_blocks=(bb1, bb2),
         ),
     )
-    cage.write("poc.mol")
+    cage.write(output_dir / "poc.mol")
     # Always ensure initial structures are not entirely on top of each
     # other.
     stk_guests = (
@@ -44,26 +43,7 @@ def main() -> None:
     )
     host_guest.write(output_dir / "host_multi_guest.mol")
 
-    supramolecule = spd.SupraMolecule(
-        atoms=(
-            mch.Atom(
-                id=atom.get_id(),
-                element_string=atom.__class__.__name__,
-            )
-            for atom in host_guest.get_atoms()
-        ),
-        bonds=(
-            mch.Bond(
-                id=i,
-                atom_ids=(
-                    bond.get_atom1().get_id(),
-                    bond.get_atom2().get_id(),
-                ),
-            )
-            for i, bond in enumerate(host_guest.get_bonds())
-        ),
-        position_matrix=host_guest.get_position_matrix(),
-    )
+    supramolecule = spd.SupraMolecule.init_from_stk(host_guest)
     print(supramolecule)  # noqa: T201
 
     cg = spd.Spinner(
