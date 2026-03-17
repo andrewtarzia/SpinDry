@@ -1,7 +1,7 @@
 import mchammer as mch
 import numpy as np
-import spindry as spd
 
+import spindry as spd
 from tests.utilities import is_equivalent_spd_molecule
 
 
@@ -12,14 +12,14 @@ def test_opt(
     final_potential: float,
 ) -> None:
     test = spinner.get_final_conformer(smolecule)
-    print(test.get_position_matrix(), final_pos_mat)
+
     assert np.all(
         np.allclose(
             final_pos_mat,
             test.get_position_matrix(),
         )
     )
-    print(spinner.compute_potential(test), final_potential)
+
     assert np.isclose(spinner.compute_potential(test), final_potential)
 
 
@@ -75,7 +75,7 @@ def test_opt_setcomp1(
         smolecule_components,
         movable_components1,
     )
-    print(test.get_position_matrix(), final_comp_pos_mat1)
+
     assert np.all(
         np.allclose(
             final_comp_pos_mat1,
@@ -94,7 +94,7 @@ def test_opt_setcomp2(
         smolecule_components,
         movable_components2,
     )
-    print(test.get_position_matrix(), final_comp_pos_mat2)
+
     assert np.all(
         np.allclose(
             final_comp_pos_mat2,

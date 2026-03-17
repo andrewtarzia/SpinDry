@@ -157,7 +157,7 @@ class Spinner:
         self,
         supramolecule: SupraMolecule,
         movable_components: tuple[int, ...] | None = None,
-        verbose: bool = False,  # noqa: FBT001, FBT002
+        verbose: bool = False,
     ) -> abc.Iterable[mch.Molecule]:
         """Get conformers of supramolecule.
 

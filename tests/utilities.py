@@ -24,7 +24,6 @@ def is_equivalent_spd_molecule(
     molecule2: mch.Molecule,
 ) -> None:
     """Test if molecules are equivalent."""
-    print(molecule1, molecule2)
     atoms = it.zip_longest(
         molecule1.get_atoms(),
         molecule2.get_atoms(),

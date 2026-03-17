@@ -1,4 +1,5 @@
 import numpy as np
+
 import spindry as spd
 
 
@@ -9,8 +10,8 @@ def test_smolecule_define_components(
     tests = list(smolecule.get_components())
 
     assert len(tests) == len(components)
-    for test, comp in zip(tests, components):
-        for a1, a2 in zip(test.get_atoms(), comp.get_atoms()):
+    for test, comp in zip(tests, components, strict=True):
+        for a1, a2 in zip(test.get_atoms(), comp.get_atoms(), strict=True):
             assert a1.get_id() == a2.get_id()
             assert a1.get_element_string() == a2.get_element_string()
 
