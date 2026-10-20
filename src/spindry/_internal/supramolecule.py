@@ -12,6 +12,12 @@ import numpy as np
 if typing.TYPE_CHECKING:
     from collections import abc
 
+try:
+    import stk
+except ImportError:
+    stk = None  # type:ignore[assignment]
+    stk.Molecule = None  # type:ignore[assignment,misc]
+
 
 @dataclass
 class SupraMolecule(mch.Molecule):
@@ -161,6 +167,58 @@ class SupraMolecule(mch.Molecule):
         supramolecule.cid = cid
         supramolecule.potential = potential
         supramolecule.position_matrix = np.array(position_matrix).T
+        return supramolecule
+
+    @classmethod
+    def init_from_stk(
+        cls,
+        stk_molecule: stk.Molecule,
+        cid: int | None = None,
+        potential: float | None = None,
+    ) -> typing.Self:
+        """Initialize a :class:`Supramolecule` instance from components.
+
+        Parameters:
+            stk_molecule:
+                If ``stk`` is installed, then this should be any molecule.
+
+            cid:
+                Conformer id of supramolecule.
+
+            potential:
+                Potential energy of Supramolecule.
+
+        """
+        if stk is None:
+            msg = "Install stk with pip to use this method."  # type:ignore[unreachable]
+            raise RuntimeError(msg)
+
+        atoms = [
+            mch.Atom(
+                id=atom.get_id(),
+                element_string=atom.__class__.__name__,
+            )
+            for atom in stk_molecule.get_atoms()
+        ]
+        bonds = [
+            mch.Bond(
+                id=i,
+                atom_ids=(
+                    bond.get_atom1().get_id(),
+                    bond.get_atom2().get_id(),
+                ),
+            )
+            for i, bond in enumerate(stk_molecule.get_bonds())
+        ]
+        position_matrix = stk_molecule.get_position_matrix()
+
+        supramolecule: SupraMolecule = cls.__new__(cls)
+        supramolecule.atoms = tuple(atoms)
+        supramolecule.bonds = tuple(bonds)
+        supramolecule.cid = cid
+        supramolecule.potential = potential
+        supramolecule.position_matrix = np.array(position_matrix).T
+        supramolecule._define_components()
         return supramolecule
 
     def _define_components(self) -> None:

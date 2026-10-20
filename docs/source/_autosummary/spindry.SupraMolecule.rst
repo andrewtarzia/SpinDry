@@ -21,6 +21,7 @@ spindry.SupraMolecule
       ~SupraMolecule.get_components
       ~SupraMolecule.get_potential
       ~SupraMolecule.init_from_components
+      ~SupraMolecule.init_from_stk
       ~SupraMolecule.with_displacement
       ~SupraMolecule.with_position_matrix
       ~SupraMolecule.write_xyz_content
