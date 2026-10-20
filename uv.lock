@@ -4303,7 +4303,7 @@ wheels = [
 
 [[package]]
 name = "pip-tools"
-version = "6.4.0"
+version = "6.1.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
     "python_full_version >= '3.6.8' and python_full_version < '3.7'",
@@ -4314,12 +4314,10 @@ dependencies = [
     { name = "click", version = "8.0.4", source = { registry = "https://pypi.org/simple" } },
     { name = "pep517" },
     { name = "pip", version = "21.3.1", source = { registry = "https://pypi.org/simple" } },
-    { name = "setuptools", version = "59.6.0", source = { registry = "https://pypi.org/simple" } },
-    { name = "wheel", version = "0.37.1", source = { registry = "https://pypi.org/simple" } },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/57/c1/26473668860f7436d101c99a4fad707be802d26f254ef7147a65f7d2e7c9/pip-tools-6.4.0.tar.gz", hash = "sha256:65553a15b1ba34be5e43889345062e38fb9b219ffa23b084ca0d4c4039b6f53b", size = 110523, upload-time = "2021-10-12T16:00:20.604Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/12/8a/fbbeee026613df03643fc5f9cf00e41932c465caa77ad78a41ab8fe0083a/pip-tools-6.1.0.tar.gz", hash = "sha256:400bf77e29cca48c31abc210042932bb52dcc138ef4ea4d52c5db429aa8ae6ee", size = 122377, upload-time = "2021-04-14T09:21:40.253Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/96/8c/3644dc1b7f08e8709d980a753740507edf996222890a1cb49fd0d1d11695/pip_tools-6.4.0-py3-none-any.whl", hash = "sha256:bb2c3272bc229b4a6d25230ebe255823aba1aa466a0d698c48ab7eb5ab7efdc9", size = 47929, upload-time = "2021-10-12T16:00:05.844Z" },
+    { url = "https://files.pythonhosted.org/packages/47/68/4bea0adffce2e3d06476ef1701cf85192ed95fce8393fb71ba9979e9816e/pip_tools-6.1.0-py3-none-any.whl", hash = "sha256:197e3f8839095ccec3ad1ef410e0804c07d9f17dff1c340fb417ca2b63feacc9", size = 44356, upload-time = "2021-04-14T09:21:57.151Z" },
 ]
 
 [[package]]
@@ -4338,7 +4336,7 @@ dependencies = [
     { name = "pip", version = "24.0", source = { registry = "https://pypi.org/simple" } },
     { name = "setuptools", version = "68.0.0", source = { registry = "https://pypi.org/simple" } },
     { name = "tomli", version = "2.0.1", source = { registry = "https://pypi.org/simple" } },
-    { name = "wheel", version = "0.42.0", source = { registry = "https://pypi.org/simple" } },
+    { name = "wheel" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/b0/5e/4f1beeaec03f726829d1c32e379d441ecd80f11f6afb0ea0fff75ce1e776/pip-tools-6.14.0.tar.gz", hash = "sha256:06366be0e08d86b416407333e998b4d305d5bd925151b08942ed149380ba3e47", size = 132016, upload-time = "2023-07-01T07:27:28.203Z" }
 wheels = [
@@ -4359,7 +4357,7 @@ dependencies = [
     { name = "pyproject-hooks" },
     { name = "setuptools", version = "75.3.4", source = { registry = "https://pypi.org/simple" } },
     { name = "tomli", version = "2.4.0", source = { registry = "https://pypi.org/simple" } },
-    { name = "wheel", version = "0.45.1", source = { registry = "https://pypi.org/simple" } },
+    { name = "wheel" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/c4/79/d149fb40bc425ad9defcb8ff73c65088bbc36a84b1825e035397d1c40624/pip_tools-7.5.2.tar.gz", hash = "sha256:2d64d72da6a044da1110257d333960563d7a4743637e8617dd2610ae7b82d60f", size = 164815, upload-time = "2025-11-12T22:46:12.627Z" }
 wheels = [
@@ -4391,7 +4389,7 @@ dependencies = [
     { name = "pyproject-hooks" },
     { name = "setuptools", version = "82.0.1", source = { registry = "https://pypi.org/simple" } },
     { name = "tomli", version = "2.4.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "wheel", version = "0.46.3", source = { registry = "https://pypi.org/simple" } },
+    { name = "wheel" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/4a/db/c6e2a02db5d98aa5f3250a305ce71e8bc3d1a022d1f47a54d14492ae23de/pip_tools-7.5.3.tar.gz", hash = "sha256:8fa364779ebc010cbfe17cb9de404457ac733e100840423f28f6955de7742d41", size = 176153, upload-time = "2026-02-11T18:25:07.72Z" }
 wheels = [
@@ -6583,7 +6581,7 @@ dev = [
     { name = "mypy", version = "1.4.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.7.*'" },
     { name = "mypy", version = "1.14.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.8.*'" },
     { name = "mypy", version = "1.19.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
-    { name = "pip-tools", version = "6.4.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.7'" },
+    { name = "pip-tools", version = "6.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.7'" },
     { name = "pip-tools", version = "6.14.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.7.*'" },
     { name = "pip-tools", version = "7.5.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.8.*'" },
     { name = "pip-tools", version = "7.5.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
@@ -7063,68 +7061,11 @@ wheels = [
 
 [[package]]
 name = "wheel"
-version = "0.37.1"
+version = "0.38.1"
 source = { registry = "https://pypi.org/simple" }
-resolution-markers = [
-    "python_full_version >= '3.6.8' and python_full_version < '3.7'",
-    "python_full_version >= '3.6.1' and python_full_version < '3.6.8'",
-    "python_full_version < '3.6.1'",
-]
-sdist = { url = "https://files.pythonhosted.org/packages/c0/6c/9f840c2e55b67b90745af06a540964b73589256cb10cc10057c87ac78fc2/wheel-0.37.1.tar.gz", hash = "sha256:e9a504e793efbca1b8e0e9cb979a249cf4a0a7b5b8c9e8b65a5e39d49529c1c4", size = 66376, upload-time = "2021-12-22T12:22:02.135Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7a/b0/29c0c8c6f8cebeb0de4c17bc44365cba0b35cb4246e4a27a7e12ecf92d73/wheel-0.38.1.tar.gz", hash = "sha256:ea041edf63f4ccba53ad6e035427997b3bb10ee88a4cd014ae82aeb9eea77bb9", size = 66402, upload-time = "2022-11-04T09:28:30.105Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/27/d6/003e593296a85fd6ed616ed962795b2f87709c3eee2bca4f6d0fe55c6d00/wheel-0.37.1-py2.py3-none-any.whl", hash = "sha256:4bdcd7d840138086126cd09254dc6195fb4fc6f01c050a1d7236f2630db1d22a", size = 35301, upload-time = "2021-12-22T12:22:00.742Z" },
-]
-
-[[package]]
-name = "wheel"
-version = "0.42.0"
-source = { registry = "https://pypi.org/simple" }
-resolution-markers = [
-    "python_full_version >= '3.7.1' and python_full_version < '3.8' and platform_machine != 'aarch64' and platform_machine != 'arm64'",
-    "python_full_version >= '3.7.1' and python_full_version < '3.8' and platform_machine == 'aarch64'",
-    "python_full_version >= '3.7.1' and python_full_version < '3.8' and platform_machine == 'arm64'",
-    "python_full_version >= '3.7' and python_full_version < '3.7.1'",
-]
-sdist = { url = "https://files.pythonhosted.org/packages/b0/b4/bc2baae3970c282fae6c2cb8e0f179923dceb7eaffb0e76170628f9af97b/wheel-0.42.0.tar.gz", hash = "sha256:c45be39f7882c9d34243236f2d63cbd58039e360f85d0913425fbd7ceea617a8", size = 98667, upload-time = "2023-11-26T14:37:13.353Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/c7/c3/55076fc728723ef927521abaa1955213d094933dc36d4a2008d5101e1af5/wheel-0.42.0-py3-none-any.whl", hash = "sha256:177f9c9b0d45c47873b619f5b650346d632cdc35fb5e4d25058e09c9e581433d", size = 65375, upload-time = "2023-11-26T14:37:10.942Z" },
-]
-
-[[package]]
-name = "wheel"
-version = "0.45.1"
-source = { registry = "https://pypi.org/simple" }
-resolution-markers = [
-    "python_full_version == '3.8.*'",
-]
-sdist = { url = "https://files.pythonhosted.org/packages/8a/98/2d9906746cdc6a6ef809ae6338005b3f21bb568bea3165cfc6a243fdc25c/wheel-0.45.1.tar.gz", hash = "sha256:661e1abd9198507b1409a20c02106d9670b2576e916d58f520316666abca6729", size = 107545, upload-time = "2024-11-23T00:18:23.513Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/0b/2c/87f3254fd8ffd29e4c02732eee68a83a1d3c346ae39bc6822dcbcb697f2b/wheel-0.45.1-py3-none-any.whl", hash = "sha256:708e7481cc80179af0e556bbf0cc00b8444c7321e2700b8d8580231d13017248", size = 72494, upload-time = "2024-11-23T00:18:21.207Z" },
-]
-
-[[package]]
-name = "wheel"
-version = "0.46.3"
-source = { registry = "https://pypi.org/simple" }
-resolution-markers = [
-    "python_full_version >= '3.14' and sys_platform == 'win32'",
-    "python_full_version >= '3.14' and sys_platform == 'emscripten'",
-    "python_full_version >= '3.14' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-    "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'win32'",
-    "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'emscripten'",
-    "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-    "python_full_version == '3.11.*' and sys_platform == 'win32'",
-    "python_full_version == '3.11.*' and sys_platform == 'emscripten'",
-    "python_full_version == '3.11.*' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-    "python_full_version == '3.10.*'",
-    "python_full_version == '3.9.*'",
-]
-dependencies = [
-    { name = "packaging", version = "26.0", source = { registry = "https://pypi.org/simple" } },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/89/24/a2eb353a6edac9a0303977c4cb048134959dd2a51b48a269dfc9dde00c8a/wheel-0.46.3.tar.gz", hash = "sha256:e3e79874b07d776c40bd6033f8ddf76a7dad46a7b8aa1b2787a83083519a1803", size = 60605, upload-time = "2026-01-22T12:39:49.136Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/87/22/b76d483683216dde3d67cba61fb2444be8d5be289bf628c13fc0fd90e5f9/wheel-0.46.3-py3-none-any.whl", hash = "sha256:4b399d56c9d9338230118d705d9737a2a468ccca63d5e813e2a4fc7815d8bc4d", size = 30557, upload-time = "2026-01-22T12:39:48.099Z" },
+    { url = "https://files.pythonhosted.org/packages/84/a8/4dab22a963a756e5b54ce0ab5c900c54329cff38e163fe3c67c858240ec6/wheel-0.38.1-py3-none-any.whl", hash = "sha256:7a95f9a8dc0924ef318bd55b616112c70903192f524d120acc614f59547a9e1f", size = 35996, upload-time = "2022-11-04T09:28:28.361Z" },
 ]
 
 [[package]]
