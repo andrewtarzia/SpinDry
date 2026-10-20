@@ -24,7 +24,7 @@ class Spinner:
 
     """
 
-    def __init__(  # noqa: PLR0913
+    def __init__(  # noqa: PLR0913, PLR0917
         self,
         step_size: float,
         rotation_step_size: float,
