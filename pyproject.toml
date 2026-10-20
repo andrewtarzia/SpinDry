@@ -10,7 +10,7 @@ maintainers = [
 dependencies = [
   "MCHammer",
 ]
-requires-python = ">=3.6"
+requires-python = ">=3.11"
 dynamic = ["version"]
 readme = "README.md"
 
