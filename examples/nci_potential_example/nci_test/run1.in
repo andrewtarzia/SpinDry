@@ -1,0 +1,9 @@
+1
+input.xyz
+ONAME run1
+INTEGRATE
+SUPRA
+RANGE 3 # Integration is performed in three ranges.
+-0.2 -0.02
+-0.02 0.02
+0.02 0.2
