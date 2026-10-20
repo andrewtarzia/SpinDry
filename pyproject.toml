@@ -19,7 +19,7 @@ dev = [
   "ruff",
   "mypy",
   "pip-tools",
-  "pytest<8",
+  "pytest",
   "pytest-cov",
   "sphinx",
   "sphinx-copybutton",
@@ -47,7 +47,7 @@ exclude = []
 
 [tool.ruff.lint]
 select = ["ALL"]
-ignore = ["ANN401", "COM812", "ISC001", "FBT001", "FBT002"]
+ignore = ["ANN401", "COM812", "ISC001", "FBT001", "FBT002", "CPY001"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
